@@ -25,6 +25,7 @@ struct HomeView: View {
         VStack {
             Text("Hello, world!")
                 .padding()
+                .sherpa()
             NavigationLink(destination: DetailView()) {
                 Text("Detail view")
             }
@@ -49,6 +50,14 @@ struct DetailView: View {
     }
 }
 
+extension View {
+    func sherpa() -> some View {
+        anchorPreference(key: SherpaPreferenceKey.self, value: .bounds, transform: { anchor in
+            [anchor]
+        })
+    }
+}
+
 struct SherpaView<Content: View>: View {
     @StateObject var guide = SherpaGuide()
     let content: Content
@@ -60,19 +69,33 @@ struct SherpaView<Content: View>: View {
     var body: some View {
         content
             .environmentObject(guide)
-            .overlay(overlay)
+            .overlayPreferenceValue(SherpaPreferenceKey.self, { value in
+                if let bounds = value.first {
+                    GeometryReader { proxy in
+                        Color.green
+                            .frame(width: proxy[bounds].width, height: proxy[bounds].height)
+                            .offset(x: proxy[bounds].minX, y: proxy[bounds].minY)
+                    }
+                }
+            })
     }
     
-    @ViewBuilder
-    var overlay: some View {
-        if guide.show {
-            Color.black
-                .opacity(0.3)
-                .edgesIgnoringSafeArea(.all)
-                .onTapGesture { guide.show.toggle() }
-        } else {
-            EmptyView()
-        }
+//    @ViewBuilder
+//    var overlay: some View {
+//        Color.clear
+//            .edgesIgnoringSafeArea(.all)
+//            .onTapGesture { guide.show.toggle() }
+//
+//    }
+}
+
+struct SherpaPreferenceKey: PreferenceKey {
+    typealias Value = [Anchor<CGRect>]
+    
+    static var defaultValue: Value = []
+    
+    static func reduce(value: inout Value, nextValue: () -> Value) {
+        value = nextValue()
     }
 }
 
