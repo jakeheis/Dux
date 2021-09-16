@@ -28,6 +28,7 @@ struct HomeView: View {
                 .sherpa()
             NavigationLink(destination: DetailView()) {
                 Text("Detail view")
+                    .sherpa()
             }
         }
         .navigationTitle("Home")
@@ -69,13 +70,13 @@ struct SherpaView<Content: View>: View {
     var body: some View {
         content
             .environmentObject(guide)
-            .overlayPreferenceValue(SherpaPreferenceKey.self, { value in
-                if let bounds = value.first {
+            .overlayPreferenceValue(SherpaPreferenceKey.self, { anchors in
+                if anchors.count > 0 {
                     GeometryReader { proxy in
-                        Color.green
-                            .frame(width: proxy[bounds].width, height: proxy[bounds].height)
-                            .offset(x: proxy[bounds].minX, y: proxy[bounds].minY)
+                        CutoutOverlay(cutouts: anchors.map { proxy[$0] })
+                            .fill(Color.black.opacity(0.4), style: FillStyle(eoFill: true))
                     }
+                    .edgesIgnoringSafeArea(.all)
                 }
             })
     }
@@ -89,13 +90,25 @@ struct SherpaView<Content: View>: View {
 //    }
 }
 
+struct CutoutOverlay: Shape {
+    let cutouts: [CGRect]
+    
+    func path(in rect: CGRect) -> Path {
+        var path = Path(rect)
+        for cutout in cutouts {
+            path.addRect(cutout)
+        }
+        return path
+    }
+}
+
 struct SherpaPreferenceKey: PreferenceKey {
     typealias Value = [Anchor<CGRect>]
     
     static var defaultValue: Value = []
     
     static func reduce(value: inout Value, nextValue: () -> Value) {
-        value = nextValue()
+        value += nextValue()
     }
 }
 
