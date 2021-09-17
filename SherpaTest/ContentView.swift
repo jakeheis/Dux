@@ -9,30 +9,78 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        SherpaView {
-            TabView {
-                NavigationView {
-                    HomeView()
-                }
-                .tabItem { Label("Home", systemImage: "house") }
-                Text("Hey").tabItem { Label("Profile", systemImage: "person.crop.circle") }
+        TabView {
+            NavigationView {
+                HomeView()
             }
+            .tabItem { Label("Home", systemImage: "house") }
+            Text("Hey").tabItem { Label("Profile", systemImage: "person.crop.circle") }
+        }
+    }
+}
+//
+//protocol PlanProvider {
+//    associatedtype Plan where Plan: CaseIterable & RawRepresentable, Plan.RawValue == String
+//}
+
+extension View {
+    func guide<Plan>(isActive: Bool, plan: Plan.Type) -> some View where Plan: CaseIterable & RawRepresentable, Plan.RawValue == String {
+        GuidableView(isActive: isActive, plan: plan) {
+            self
         }
     }
 }
 
+struct GuidableView<Content: View, Plan: CaseIterable & RawRepresentable>: View where Plan.RawValue == String {
+    let isActive: Bool
+    let content: Content
+    
+    @EnvironmentObject var sherpa: SherpaGuide
+    
+    var steps: [String] {
+        Plan.allCases.map { $0.rawValue }
+    }
+    
+    init(isActive: Bool, plan: Plan.Type, @ViewBuilder content: () -> Content) {
+        self.isActive = isActive
+        self.content = content()
+    }
+    
+    var body: some View {
+        content
+            .onAppear {
+                print("guide ON APPEEar")
+                if isActive {
+                    sherpa.start(plan: steps)
+                }
+            }
+            .onDisappear {
+                print("guide ON ISDSAPPEEar")
+                sherpa.stop()
+            }
+    }
+}
+
 struct HomeView: View {
+    enum Plan: String, CaseIterable {
+        case button
+        case detailView
+    }
+    
+    @EnvironmentObject var sherpa: SherpaGuide
+    
     var body: some View {
         VStack {
             Text("Hello, world!")
                 .padding()
-//                .sherpa()
             NavigationLink(destination: DetailView()) {
                 Text("Detail view")
-                    .sherpa()
+                    .sherpa(name: Plan.detailView)
             }
-            Button(action: {}) { Text("HEY") }
+            Button(action: { sherpa.advance() }) { Text("HEY") }
+                .sherpa(name: Plan.button)
         }
+        .guide(isActive: true, plan: Plan.self)
         .navigationTitle("Home")
         .navigationBarTitleDisplayMode(.inline)
     }
@@ -45,23 +93,18 @@ struct DetailView: View {
         VStack {
             Text("Details")
         }
-        .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                sherpa.show = true
-            }
-        }
     }
 }
 
 extension View {
-    func sherpa() -> some View {
+    func sherpa<T: RawRepresentable>(name: T) -> some View where T.RawValue == String {
         anchorPreference(key: SherpaPreferenceKey.self, value: .bounds, transform: { anchor in
-            [anchor]
+            [name.rawValue: anchor]
         })
     }
 }
 
-struct SherpaView<Content: View>: View {
+struct SherpaContainerView<Content: View>: View {
     @StateObject var guide = SherpaGuide()
     let content: Content
     
@@ -73,10 +116,13 @@ struct SherpaView<Content: View>: View {
         content
             .environmentObject(guide)
             .overlayPreferenceValue(SherpaPreferenceKey.self, { anchors in
-                if anchors.count > 0 {
+                if let active = guide.active, anchors[active] == nil {
+                    failed(active: active)
+                }
+                if let active = guide.active, let anchor = anchors[active] {
                     ZStack {
                         GeometryReader { proxy in
-                            ForEach(overlayFrames(for: anchors.map { proxy[$0] }, screen: proxy.size)) { frame in
+                            ForEach(overlayFrames(for: proxy[anchor], screen: proxy.size)) { frame in
                                 Color.black.opacity(0.4)
                                     .frame(width: frame.rect.width, height: frame.rect.height)
                                     .offset(x: frame.rect.minX, y: frame.rect.minY)
@@ -87,7 +133,12 @@ struct SherpaView<Content: View>: View {
             })
     }
     
-    func overlayFrames(for rects: [CGRect], screen: CGSize) -> [OverlayFrame] {
+    func failed(active: String) -> some View {
+        assertionFailure("Could not find plan view: '\(active)'")
+        return EmptyView()
+    }
+    
+    func overlayFrames(for only: CGRect, screen: CGSize) -> [OverlayFrame] {
 //        var significantXCoordinates: Set<CGFloat> = []
 //        var significantYCoordinates: Set<CGFloat> = []
 //
@@ -109,7 +160,6 @@ struct SherpaView<Content: View>: View {
 //            .edgesIgnoringSafeArea(.all)
 //            .onTapGesture { guide.show.toggle() }
         
-        let only = rects[0]
         return [
             .init(rect: .init(x: 0, y: 0, width: only.minX, height: screen.height)),
             .init(rect: .init(x: only.maxX, y: 0, width: screen.width - only.maxX, height: screen.height)),
@@ -158,17 +208,51 @@ struct CutoutOverlay: Shape {
 }
 
 struct SherpaPreferenceKey: PreferenceKey {
-    typealias Value = [Anchor<CGRect>]
+    typealias Value = [String: Anchor<CGRect>]
     
-    static var defaultValue: Value = []
+    static var defaultValue: Value = [:]
     
-    static func reduce(value: inout Value, nextValue: () -> Value) {
-        value += nextValue()
+    static func reduce(value acc: inout Value, nextValue: () -> Value) {
+        let newValue = nextValue()
+        for (key, value) in newValue {
+            acc[key] = value
+        }
     }
 }
 
 class SherpaGuide: ObservableObject {
-    @Published var show = false
+    @Published private(set) var active: String?
+    
+    private var currentPlan: [String]?
+    
+    func advance() {
+        guard let active = active, let currentPlan = currentPlan else {
+            return
+        }
+        guard let index = currentPlan.firstIndex(of: active), index + 1 < currentPlan.count else {
+            return
+        }
+        
+        withAnimation {
+            self.active = currentPlan[index + 1]
+        }
+    }
+    
+    func start(plan: [String], after interval: TimeInterval = 0.5) {
+        currentPlan = plan
+        if plan.count > 0 {
+            DispatchQueue.main.asyncAfter(deadline: .now() + interval) {
+                withAnimation {
+                    self.active = plan[0]
+                }
+            }
+        }
+    }
+    
+    func stop() {
+        currentPlan = nil
+        active = nil
+    }
 }
 
 struct ContentView_Previews: PreviewProvider {

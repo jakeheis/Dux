@@ -11,7 +11,9 @@ import SwiftUI
 struct SherpaTestApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            SherpaContainerView {
+                ContentView()
+            }
         }
     }
 }
