@@ -13,7 +13,8 @@ struct ContentView: View {
             TabView {
                 NavigationView {
                     HomeView()
-                }.tabItem { Label("Home", systemImage: "house") }
+                }
+                .tabItem { Label("Home", systemImage: "house") }
                 Text("Hey").tabItem { Label("Profile", systemImage: "person.crop.circle") }
             }
         }
@@ -25,11 +26,12 @@ struct HomeView: View {
         VStack {
             Text("Hello, world!")
                 .padding()
-                .sherpa()
+//                .sherpa()
             NavigationLink(destination: DetailView()) {
                 Text("Detail view")
                     .sherpa()
             }
+            Button(action: {}) { Text("HEY") }
         }
         .navigationTitle("Home")
         .navigationBarTitleDisplayMode(.inline)
@@ -72,26 +74,79 @@ struct SherpaView<Content: View>: View {
             .environmentObject(guide)
             .overlayPreferenceValue(SherpaPreferenceKey.self, { anchors in
                 if anchors.count > 0 {
-                    GeometryReader { proxy in
-                        CutoutOverlay(cutouts: anchors.map { proxy[$0] })
-                            .fill(Color.black.opacity(0.4), style: FillStyle(eoFill: true))
-                    }
-                    .edgesIgnoringSafeArea(.all)
+                    ZStack {
+                        GeometryReader { proxy in
+                            ForEach(overlayFrames(for: anchors.map { proxy[$0] }, screen: proxy.size)) { frame in
+                                Color.black.opacity(0.4)
+                                    .frame(width: frame.rect.width, height: frame.rect.height)
+                                    .offset(x: frame.rect.minX, y: frame.rect.minY)
+                            }
+                        }
+                    }.edgesIgnoringSafeArea(.all)
                 }
             })
     }
     
-//    @ViewBuilder
-//    var overlay: some View {
-//        Color.clear
+    func overlayFrames(for rects: [CGRect], screen: CGSize) -> [OverlayFrame] {
+//        var significantXCoordinates: Set<CGFloat> = []
+//        var significantYCoordinates: Set<CGFloat> = []
+//
+//        for rect in rects {
+//            significantXCoordinates.insert(rect.minX)
+//            significantXCoordinates.insert(rect.maxX)
+//            significantYCoordinates.insert(rect.minY)
+//            significantYCoordinates.insert(rect.maxY)
+//        }
+//
+//        let xs = significantXCoordinates.sorted()
+//        let ys = significantYCoordinates.sorted()
+//
+//        var overlayRects: [CGRect] = []
+//
+//
+//
+//        return Color.clear
 //            .edgesIgnoringSafeArea(.all)
 //            .onTapGesture { guide.show.toggle() }
-//
-//    }
+        
+        let only = rects[0]
+        return [
+            .init(rect: .init(x: 0, y: 0, width: only.minX, height: screen.height)),
+            .init(rect: .init(x: only.maxX, y: 0, width: screen.width - only.maxX, height: screen.height)),
+            .init(rect: .init(x: only.minX, y: 0, width: only.width, height: only.minY)),
+            .init(rect: .init(x: only.minX, y: only.maxY, width: only.width, height: screen.height - only.maxY))
+        ]
+
+        
+//        Color.black.opacity(0.4)
+//            .edgesIgnoringSafeArea(.all)
+//            .onTapGesture(perform: { print("TAP before") })
+//                            .mask(CutoutOverlay(proxy: proxy, anchors: anchors).fill(style: FillStyle(eoFill: true)))
+//                            .clipShape(CutoutOverlay(proxy: proxy, anchors: anchors), style: FillStyle(eoFill: true))
+//                            .contentShape(CutoutOverlay(proxy: proxy, anchors: anchors), eoFill: true)
+    }
+}
+
+struct OverlayFrame: Identifiable {
+    let rect: CGRect
+    
+    var id: String {
+        rect.debugDescription
+    }
+}
+
+struct Ten: Shape {
+    func path(in rect: CGRect) -> Path {
+        Path(CGRect(x: rect.midX - 10, y: rect.midY + 5, width: 20, height: 20))
+    }
 }
 
 struct CutoutOverlay: Shape {
     let cutouts: [CGRect]
+    
+    init(proxy: GeometryProxy, anchors: [Anchor<CGRect>]) {
+        cutouts = anchors.map { proxy[$0] }
+    }
     
     func path(in rect: CGRect) -> Path {
         var path = Path(rect)
