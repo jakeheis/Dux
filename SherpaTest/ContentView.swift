@@ -158,13 +158,22 @@ extension View {
     }
 }
 
-struct SherpaContainerView<Content: View>: View {
-    @StateObject var guide = SherpaGuide()
+extension SherpaContainerView where Overlay == EmptyView {
+    init(@ViewBuilder content: () -> Content) {
+        self.init(overlay: EmptyView(), content: content)
+    }
+}
+
+struct SherpaContainerView<Overlay: View, Content: View>: View {
+    @StateObject private var guide = SherpaGuide()
+    
     let content: Content
+    let overlay: Overlay
     
     @State private var popoverSize: CGSize = .zero
     
-    init(@ViewBuilder content: () -> Content) {
+    init(overlay: Overlay, @ViewBuilder content: () -> Content) {
+        self.overlay = overlay
         self.content = content()
     }
     
@@ -180,6 +189,7 @@ struct SherpaContainerView<Content: View>: View {
                         if let current = guide.current, let config = anchors[current] {
                             Popover(config: config).opacity(0)
                         }
+                        overlay.environmentObject(guide)
                     }
                 case .active:
                     if let current = guide.current, let config = anchors[current] {
@@ -193,6 +203,7 @@ struct SherpaContainerView<Content: View>: View {
                                 
                                 Popover(config: config)
                                     .offset(x: proxy[config.anchor].midX - popoverSize.width / 2, y: proxy[config.anchor].minY - popoverSize.height)
+                                overlay.environmentObject(guide)
                             }
                         }.edgesIgnoringSafeArea(.all)
                         .onTapGesture {
