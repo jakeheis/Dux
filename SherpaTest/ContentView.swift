@@ -47,7 +47,7 @@ struct GuidableView<Content: View, Plan: SherpaPlan>: View {
         content
             .onAppear {
                 if isActive {
-                    sherpa.start(plan: Plan.allCases.map { $0.key() })
+                    sherpa.start(plan: Array(Plan.allCases))
                 }
             }
     }
@@ -87,18 +87,33 @@ struct SherpaMark {
     let content: AnyView
 }
 
-protocol SherpaPlan: CaseIterable {
+protocol SherpaPlanItem {
+    func config() -> CalloutConfig
+    
+    func onExplanationTap(sherpa: SherpaGuide)
+    func onBackgroundTap(sherpa: SherpaGuide)
+}
+
+extension SherpaPlanItem {
+    func key() -> String {
+        String(reflecting: Self.self) + "." + String(describing: self)
+    }
+    
+    func onExplanationTap(sherpa: SherpaGuide) {
+        sherpa.advance()
+    }
+    
+    func onBackgroundTap(sherpa: SherpaGuide) {
+        sherpa.advance()
+    }
+}
+
+protocol SherpaPlan: CaseIterable, SherpaPlanItem {
 //    associatedtype Mark: View
     
 //    func mark() -> SherpaMark
     
     func config() -> CalloutConfig
-}
-
-extension SherpaPlan {
-    func key() -> String {
-        String(reflecting: Self.self) + "." + String(describing: self)
-    }
 }
 
 struct CalloutConfig {
@@ -201,28 +216,34 @@ struct SherpaContainerView<Overlay: View, Content: View>: View {
         self.content = content()
     }
     
+    func currentDetails(from all: SherpaPreferenceKey.Value) -> SherpaDetails? {
+        if let current = guide.current, let details = all[current.key()] {
+            return details
+        } else {
+            return nil
+        }
+    }
+    
     var body: some View {
         content
             .environmentObject(guide)
-            .overlayPreferenceValue(SherpaPreferenceKey.self, { anchors in
-                switch guide.state {
-                case .hidden: EmptyView()
-                case .transition:
-                    ZStack {
-                        Color.black.opacity(0.4).edgesIgnoringSafeArea(.all)
-                        if let current = guide.current, let details = anchors[current] {
+            .overlayPreferenceValue(SherpaPreferenceKey.self, { all in
+                ZStack {
+                    if guide.state == .transition {
+                        Color.black.opacity(0.4)
+                        if let details = currentDetails(from: all) {
                             Popover(config: details.config).opacity(0)
                         }
-                        overlay.environmentObject(guide)
-                    }
-                case .active:
-                    if let current = guide.current, let details = anchors[current] {
-                        ZStack {
+                    } else if guide.state == .active {
+                        if let current = guide.current, let details = currentDetails(from: all) {
                             GeometryReader { proxy in
                                 ForEach(overlayFrames(for: proxy[details.anchor], screen: proxy.size)) { frame in
                                     Color.black.opacity(0.4)
                                         .frame(width: frame.rect.width, height: frame.rect.height)
                                         .offset(x: frame.rect.minX, y: frame.rect.minY)
+                                }
+                                .onTapGesture {
+                                    current.onBackgroundTap(sherpa: guide)
                                 }
                                 
                                 Popover(config: details.config)
@@ -230,18 +251,17 @@ struct SherpaContainerView<Overlay: View, Content: View>: View {
                                         x: proxy[details.anchor].midX - popoverSize.width / 2,
                                         y: details.config.direction == .up ? proxy[details.anchor].minY - popoverSize.height : proxy[details.anchor].maxY
                                     )
+                                    .onTapGesture {
+                                        current.onExplanationTap(sherpa: guide)
+                                    }
                                 overlay.environmentObject(guide)
                             }
-                        }.edgesIgnoringSafeArea(.all)
-                        .onTapGesture {
-                            withAnimation {
-                                guide.hide()
-                            }
+                        } else {
+                            failed(active: guide.current?.key())
                         }
-                    } else {
-                        failed(active: guide.current)
                     }
-                }
+                    overlay.environmentObject(guide).opacity(guide.state != .hidden ? 0.4 : 0)
+                }.edgesIgnoringSafeArea(.all)
             })
             .onPreferenceChange(PopoverPreferenceKey.self, perform: { popoverSize = $0 })
     }
@@ -381,15 +401,20 @@ final class SherpaGuide: ObservableObject {
     }
     
     @Published private(set) var state: State = .hidden
-    private(set) var current: String? = nil
+    private(set) var current: SherpaPlanItem? = nil
 
-    private var currentPlan: [String]?
+    private var currentPlan: [SherpaPlanItem]?
     
     func advance() {
         guard let current = current, let currentPlan = currentPlan else {
             return
         }
-        guard let index = currentPlan.firstIndex(of: current), index + 1 < currentPlan.count else {
+        guard let index = currentPlan.firstIndex(where: { $0.key() == current.key() }) else {
+            return
+        }
+        
+        guard index + 1 < currentPlan.count else {
+            stop()
             return
         }
         
@@ -409,7 +434,7 @@ final class SherpaGuide: ObservableObject {
         }
     }
     
-    func start(plan: [String], after interval: TimeInterval = 0.5) {
+    func start(plan: [SherpaPlanItem], after interval: TimeInterval = 0.5) {
         currentPlan = plan
         if plan.count > 0 {
             current = plan[0]
@@ -425,7 +450,17 @@ final class SherpaGuide: ObservableObject {
         state = .hidden
     }
     
-    func stop() {
+    func stop(animated: Bool = true) {
+        if animated {
+            withAnimation {
+                stopImpl()
+            }
+        } else {
+            stopImpl()
+        }
+    }
+    
+    private func stopImpl() {
         state = .hidden
         currentPlan = nil
         current = nil
