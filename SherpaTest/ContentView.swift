@@ -163,25 +163,39 @@ struct SherpaContainerView<Content: View>: View {
         content
             .environmentObject(guide)
             .overlayPreferenceValue(SherpaPreferenceKey.self, { anchors in
-                if let active = guide.active, anchors[active] == nil {
-                    failed(active: active)
-                }
-                if let active = guide.active, let config = anchors[active] {
+                switch guide.state {
+                case .inactive: EmptyView()
+                case .transition(let destination):
                     ZStack {
-                        GeometryReader { proxy in
-                            ForEach(overlayFrames(for: proxy[config.anchor], screen: proxy.size)) { frame in
-                                Color.black.opacity(0.4)
-                                    .frame(width: frame.rect.width, height: frame.rect.height)
-                                    .offset(x: frame.rect.minX, y: frame.rect.minY)
-                            }
-                            
-                            Popover(config: config)
-                                .offset(x: proxy[config.anchor].midX - popoverSize.width / 2, y: proxy[config.anchor].minY - popoverSize.height)
+                        Color.black.opacity(0.4).edgesIgnoringSafeArea(.all)
+                        if let config = anchors[destination] {
+                            Popover(config: config).opacity(0)
                         }
-                    }.edgesIgnoringSafeArea(.all)
+                    }
+                case .active(let active):
+                    if let config = anchors[active] {
+                        ZStack {
+                            GeometryReader { proxy in
+                                ForEach(overlayFrames(for: proxy[config.anchor], screen: proxy.size)) { frame in
+                                    Color.black.opacity(0.4)
+                                        .frame(width: frame.rect.width, height: frame.rect.height)
+                                        .offset(x: frame.rect.minX, y: frame.rect.minY)
+                                }
+                                
+                                Popover(config: config)
+                                    .offset(x: proxy[config.anchor].midX - popoverSize.width / 2, y: proxy[config.anchor].minY - popoverSize.height)
+                            }
+                        }.edgesIgnoringSafeArea(.all)
+                    } else {
+                        failed(active: active)
+                    }
                 }
             })
-            .onPreferenceChange(PopoverPreferenceKey.self, perform: { popoverSize = $0 })
+            .onPreferenceChange(PopoverPreferenceKey.self, perform: {
+                                    popoverSize = $0
+                
+                print("UPDdate size to", $0)
+            })
     }
     
     func failed(active: String) -> some View {
@@ -312,12 +326,18 @@ struct SherpaPreferenceKey: PreferenceKey {
 }
 
 class SherpaGuide: ObservableObject {
-    @Published private(set) var active: String?
+    enum State {
+        case inactive
+        case transition(String)
+        case active(String)
+    }
+    
+    @Published private(set) var state: State = .inactive
     
     private var currentPlan: [String]?
     
     func advance() {
-        guard let active = active, let currentPlan = currentPlan else {
+        guard case .active(let active) = state, let currentPlan = currentPlan else {
             return
         }
         guard let index = currentPlan.firstIndex(of: active), index + 1 < currentPlan.count else {
@@ -325,7 +345,12 @@ class SherpaGuide: ObservableObject {
         }
         
         withAnimation {
-            self.active = currentPlan[index + 1]
+            self.state = .transition(currentPlan[index + 1])
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                withAnimation {
+                    self.state = .active(currentPlan[index + 1])
+                }
+            }
         }
     }
     
@@ -334,7 +359,7 @@ class SherpaGuide: ObservableObject {
         if plan.count > 0 {
             DispatchQueue.main.asyncAfter(deadline: .now() + interval) {
                 withAnimation {
-                    self.active = plan[0]
+                    self.state = .active(plan[0])
                 }
             }
         }
@@ -342,7 +367,7 @@ class SherpaGuide: ObservableObject {
     
     func stop() {
         currentPlan = nil
-        active = nil
+        state = .inactive
     }
 }
 
