@@ -173,16 +173,16 @@ struct SherpaContainerView<Content: View>: View {
             .environmentObject(guide)
             .overlayPreferenceValue(SherpaPreferenceKey.self, { anchors in
                 switch guide.state {
-                case .inactive: EmptyView()
-                case .transition(let destination):
+                case .hidden: EmptyView()
+                case .transition:
                     ZStack {
                         Color.black.opacity(0.4).edgesIgnoringSafeArea(.all)
-                        if let config = anchors[destination] {
+                        if let current = guide.current, let config = anchors[current] {
                             Popover(config: config).opacity(0)
                         }
                     }
-                case .active(let active):
-                    if let config = anchors[active] {
+                case .active:
+                    if let current = guide.current, let config = anchors[current] {
                         ZStack {
                             GeometryReader { proxy in
                                 ForEach(overlayFrames(for: proxy[config.anchor], screen: proxy.size)) { frame in
@@ -195,20 +195,21 @@ struct SherpaContainerView<Content: View>: View {
                                     .offset(x: proxy[config.anchor].midX - popoverSize.width / 2, y: proxy[config.anchor].minY - popoverSize.height)
                             }
                         }.edgesIgnoringSafeArea(.all)
+                        .onTapGesture {
+                            withAnimation {
+                                guide.hide()
+                            }
+                        }
                     } else {
-                        failed(active: active)
+                        failed(active: guide.current)
                     }
                 }
             })
-            .onPreferenceChange(PopoverPreferenceKey.self, perform: {
-                                    popoverSize = $0
-                
-                print("UPDdate size to", $0)
-            })
+            .onPreferenceChange(PopoverPreferenceKey.self, perform: { popoverSize = $0 })
     }
     
-    func failed(active: String) -> some View {
-        assertionFailure("Could not find plan view: '\(active)'")
+    func failed(active: String?) -> some View {
+        assertionFailure("Could not find plan view: '\(active ?? "<nil>")'")
         return EmptyView()
     }
     
@@ -336,29 +337,36 @@ struct SherpaPreferenceKey: PreferenceKey {
 
 class SherpaGuide: ObservableObject {
     enum State {
-        case inactive
-        case transition(String)
-        case active(String)
+        case hidden
+        case transition
+        case active
     }
     
-    @Published private(set) var state: State = .inactive
-    
+    @Published private(set) var state: State = .hidden
+    private(set) var current: String? = nil
+
     private var currentPlan: [String]?
     
     func advance() {
-        guard case .active(let active) = state, let currentPlan = currentPlan else {
+        guard let current = current, let currentPlan = currentPlan else {
             return
         }
-        guard let index = currentPlan.firstIndex(of: active), index + 1 < currentPlan.count else {
+        guard let index = currentPlan.firstIndex(of: current), index + 1 < currentPlan.count else {
             return
         }
         
+        self.current = currentPlan[index + 1]
+        
         withAnimation {
-            self.state = .transition(currentPlan[index + 1])
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                withAnimation {
-                    self.state = .active(currentPlan[index + 1])
+            if state == .active {
+                self.state = .transition
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    withAnimation {
+                        self.state = .active
+                    }
                 }
+            } else {
+                self.state = .active
             }
         }
     }
@@ -366,17 +374,23 @@ class SherpaGuide: ObservableObject {
     func start(plan: [String], after interval: TimeInterval = 0.5) {
         currentPlan = plan
         if plan.count > 0 {
+            current = plan[0]
             DispatchQueue.main.asyncAfter(deadline: .now() + interval) {
                 withAnimation {
-                    self.state = .active(plan[0])
+                    self.state = .active
                 }
             }
         }
     }
     
+    func hide() {
+        state = .hidden
+    }
+    
     func stop() {
         currentPlan = nil
-        state = .inactive
+        current = nil
+        state = .hidden
     }
 }
 
