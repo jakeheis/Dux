@@ -24,33 +24,30 @@ struct ContentView: View {
 //}
 
 extension View {
-    func guide<Plan>(isActive: Bool, plan: Plan.Type) -> some View where Plan: CaseIterable & RawRepresentable, Plan.RawValue == String {
+    func guide<Plan>(isActive: Bool, plan: Plan.Type) -> some View where Plan: SherpaPlan {
         GuidableView(isActive: isActive, plan: plan) {
             self
         }
     }
 }
 
-struct GuidableView<Content: View, Plan: CaseIterable & RawRepresentable>: View where Plan.RawValue == String {
+struct GuidableView<Content: View, Plan: SherpaPlan>: View {
     let isActive: Bool
     let content: Content
     
-    @EnvironmentObject var sherpa: SherpaGuide
-    
-    var steps: [String] {
-        Plan.allCases.map { $0.rawValue }
-    }
+    @EnvironmentObject private var sherpa: SherpaGuide
     
     init(isActive: Bool, plan: Plan.Type, @ViewBuilder content: () -> Content) {
         self.isActive = isActive
         self.content = content()
+//        self.steps = Plan.allCases.map { $0.rawValue }
     }
     
     var body: some View {
         content
             .onAppear {
                 if isActive {
-                    sherpa.start(plan: steps)
+                    sherpa.start(plan: Plan.allCases.map { $0.rawValue })
                 }
             }
     }
@@ -83,10 +80,31 @@ struct SherpaNavigationLink<Destination: View, Label: View>: View {
     }
 }
 
+struct SherpaMark {
+    let key: String
+    let content: AnyView
+}
+
+protocol SherpaPlan: RawRepresentable, CaseIterable where RawValue == String {
+//    associatedtype Mark: View
+    
+//    func mark() -> SherpaMark
+}
+
 struct HomeView: View {
-    enum Plan: String, CaseIterable {
+    enum Plan: String, SherpaPlan {
         case button
         case detailView
+//
+//        func mark() -> SherpaMark {
+//            switch self {
+//            case .button:
+//                return .init(key: Self.button.rawValue, content: <#T##AnyView#>)
+//                Text("Tap here!")
+//            case .detailView:
+//                Text("This will take you to detail view")
+//            }
+//        }
     }
     
     @EnvironmentObject var sherpa: SherpaGuide
@@ -97,10 +115,10 @@ struct HomeView: View {
                 .padding()
             SherpaNavigationLink(destination: DetailView()) {
                 Text("Detail view")
-                    .sherpa(name: Plan.detailView)
+                    .sherpa(name: Plan.detailView, text: "This takes you to a detail view")
             }
             Button(action: { sherpa.advance() }) { Text("HEY") }
-                .sherpa(name: Plan.button)
+                .sherpa(name: Plan.button, text: "Tap here!")
         }
         .guide(isActive: true, plan: Plan.self)
         .navigationTitle("Home")
@@ -118,10 +136,15 @@ struct DetailView: View {
     }
 }
 
+struct SherpaConfig {
+    let anchor: Anchor<CGRect>
+    let text: String
+}
+
 extension View {
-    func sherpa<T: RawRepresentable>(name: T) -> some View where T.RawValue == String {
+    func sherpa<T: RawRepresentable>(name: T, text: String) -> some View where T.RawValue == String {
         anchorPreference(key: SherpaPreferenceKey.self, value: .bounds, transform: { anchor in
-            [name.rawValue: anchor]
+            [name.rawValue: SherpaConfig(anchor: anchor, text: text)]
         })
     }
 }
@@ -129,6 +152,8 @@ extension View {
 struct SherpaContainerView<Content: View>: View {
     @StateObject var guide = SherpaGuide()
     let content: Content
+    
+    @State private var popoverSize: CGSize = .zero
     
     init(@ViewBuilder content: () -> Content) {
         self.content = content()
@@ -141,18 +166,22 @@ struct SherpaContainerView<Content: View>: View {
                 if let active = guide.active, anchors[active] == nil {
                     failed(active: active)
                 }
-                if let active = guide.active, let anchor = anchors[active] {
+                if let active = guide.active, let config = anchors[active] {
                     ZStack {
                         GeometryReader { proxy in
-                            ForEach(overlayFrames(for: proxy[anchor], screen: proxy.size)) { frame in
+                            ForEach(overlayFrames(for: proxy[config.anchor], screen: proxy.size)) { frame in
                                 Color.black.opacity(0.4)
                                     .frame(width: frame.rect.width, height: frame.rect.height)
                                     .offset(x: frame.rect.minX, y: frame.rect.minY)
                             }
+                            
+                            Popover(config: config)
+                                .offset(x: proxy[config.anchor].midX - popoverSize.width / 2, y: proxy[config.anchor].minY - popoverSize.height)
                         }
                     }.edgesIgnoringSafeArea(.all)
                 }
             })
+            .onPreferenceChange(PopoverPreferenceKey.self, perform: { popoverSize = $0 })
     }
     
     func failed(active: String) -> some View {
@@ -199,6 +228,46 @@ struct SherpaContainerView<Content: View>: View {
     }
 }
 
+struct Popover: View {
+    let config: SherpaConfig
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            PopoverContent(config: config)
+                .background(RoundedRectangle(cornerRadius: 5).fill(Color.white))
+            Image(systemName: "triangle.fill")
+                .resizable().aspectRatio(contentMode: .fit)
+                .foregroundColor(Color.white)
+                .rotationEffect(.degrees(180))
+                .frame(width: 15)
+                .offset(y: -3)
+        }
+        .overlay(GeometryReader { proxy in
+            Color.clear
+                .preference(key: PopoverPreferenceKey.self, value: proxy.size)
+        })
+    }
+}
+
+struct PopoverContent: View {
+    let config: SherpaConfig
+    
+    var body: some View {
+        Text(config.text)
+            .padding(6)
+    }
+}
+
+struct PopoverPreferenceKey: PreferenceKey {
+    typealias Value = CGSize
+
+    static var defaultValue: Value = .zero
+    
+    static func reduce(value: inout Value, nextValue: () -> Value) {
+        value = nextValue()
+    }
+}
+
 struct OverlayFrame: Identifiable {
     let rect: CGRect
     
@@ -230,7 +299,7 @@ struct CutoutOverlay: Shape {
 }
 
 struct SherpaPreferenceKey: PreferenceKey {
-    typealias Value = [String: Anchor<CGRect>]
+    typealias Value = [String: SherpaConfig]
     
     static var defaultValue: Value = [:]
     
