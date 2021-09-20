@@ -91,6 +91,8 @@ protocol SherpaPlan: CaseIterable {
 //    associatedtype Mark: View
     
 //    func mark() -> SherpaMark
+    
+    func config() -> CalloutConfig
 }
 
 extension SherpaPlan {
@@ -99,20 +101,43 @@ extension SherpaPlan {
     }
 }
 
+struct CalloutConfig {
+    enum Direction {
+        case up
+        case down
+    }
+    
+    static func text(_ text: String, direction: Direction = .up) -> Self {
+        .view(direction: direction) { Text(text) }
+    }
+    
+    static func view<V: View>(direction: Direction = .up, @ViewBuilder content: () -> V) -> Self {
+        let view = content().padding(6).background(RoundedRectangle(cornerRadius: 5).fill(Color.white))
+        return .init(body: AnyView(view), direction: direction)
+    }
+    
+    let body: AnyView
+    let direction: Direction
+}
+
 struct HomeView: View {
     enum Plan: SherpaPlan {
         case button
         case detailView
-//
-//        func mark() -> SherpaMark {
-//            switch self {
-//            case .button:
-//                return .init(key: Self.button.rawValue, content: <#T##AnyView#>)
-//                Text("Tap here!")
-//            case .detailView:
-//                Text("This will take you to detail view")
-//            }
-//        }
+        
+        func config() -> CalloutConfig {
+            switch self {
+            case .button:
+                return .text("Tap here!")
+            case .detailView:
+                return .view(direction: .down) {
+                    HStack {
+                        Text("This takes you to a detail view")
+                        Image(systemName: "chevron.right")
+                    }
+                }
+            }
+        }
     }
     
     @EnvironmentObject var sherpa: SherpaGuide
@@ -123,13 +148,10 @@ struct HomeView: View {
                 .padding()
             SherpaNavigationLink(destination: DetailView()) {
                 Text("Detail view")
-                    .sherpa(name: Plan.detailView, mark: HStack {
-                        Text("This takes you to a detail view")
-                        Image(systemName: "chevron.right")
-                    })
+                    .sherpaMark(Plan.detailView)
             }
             Button(action: { sherpa.advance() }) { Text("HEY") }
-                .sherpa(name: Plan.button, text: "Tap here!")
+                .sherpaMark(Plan.button)
         }
         .guide(isActive: true, plan: Plan.self)
         .navigationTitle("Home")
@@ -147,19 +169,15 @@ struct DetailView: View {
     }
 }
 
-struct SherpaConfig {
+struct SherpaDetails {
     let anchor: Anchor<CGRect>
-    let text: AnyView
+    let config: CalloutConfig
 }
 
 extension View {
-    func sherpa<T: SherpaPlan>(name: T, text: String) -> some View {
-        sherpa(name: name, mark: Text(text))
-    }
-    
-    func sherpa<T: SherpaPlan, Mark: View>(name: T, mark: Mark) -> some View {
+    func sherpaMark<T: SherpaPlan>(_ name: T) -> some View {
         anchorPreference(key: SherpaPreferenceKey.self, value: .bounds, transform: { anchor in
-            return [name.key(): SherpaConfig(anchor: anchor, text: AnyView(mark))]
+            return [name.key(): SherpaDetails(anchor: anchor, config: name.config())]
         })
     }
 }
@@ -192,23 +210,26 @@ struct SherpaContainerView<Overlay: View, Content: View>: View {
                 case .transition:
                     ZStack {
                         Color.black.opacity(0.4).edgesIgnoringSafeArea(.all)
-                        if let current = guide.current, let config = anchors[current] {
-                            Popover(config: config).opacity(0)
+                        if let current = guide.current, let details = anchors[current] {
+                            Popover(config: details.config).opacity(0)
                         }
                         overlay.environmentObject(guide)
                     }
                 case .active:
-                    if let current = guide.current, let config = anchors[current] {
+                    if let current = guide.current, let details = anchors[current] {
                         ZStack {
                             GeometryReader { proxy in
-                                ForEach(overlayFrames(for: proxy[config.anchor], screen: proxy.size)) { frame in
+                                ForEach(overlayFrames(for: proxy[details.anchor], screen: proxy.size)) { frame in
                                     Color.black.opacity(0.4)
                                         .frame(width: frame.rect.width, height: frame.rect.height)
                                         .offset(x: frame.rect.minX, y: frame.rect.minY)
                                 }
                                 
-                                Popover(config: config)
-                                    .offset(x: proxy[config.anchor].midX - popoverSize.width / 2, y: proxy[config.anchor].minY - popoverSize.height)
+                                Popover(config: details.config)
+                                    .offset(
+                                        x: proxy[details.anchor].midX - popoverSize.width / 2,
+                                        y: details.config.direction == .up ? proxy[details.anchor].minY - popoverSize.height : proxy[details.anchor].maxY
+                                    )
                                 overlay.environmentObject(guide)
                             }
                         }.edgesIgnoringSafeArea(.all)
@@ -270,32 +291,32 @@ struct SherpaContainerView<Overlay: View, Content: View>: View {
 }
 
 struct Popover: View {
-    let config: SherpaConfig
+    let config: CalloutConfig
     
     var body: some View {
         VStack(spacing: 0) {
-            PopoverContent(config: config)
-                .background(RoundedRectangle(cornerRadius: 5).fill(Color.white))
-            Image(systemName: "triangle.fill")
-                .resizable().aspectRatio(contentMode: .fit)
-                .foregroundColor(Color.white)
-                .rotationEffect(.degrees(180))
-                .frame(width: 15)
-                .offset(y: -3)
+            if config.direction == .down {
+                arrow()
+                    .offset(y: 3)
+            }
+            config.body
+            if config.direction == .up {
+                arrow()
+                    .rotationEffect(.degrees(180))
+                    .offset(y: -3)
+            }
         }
         .overlay(GeometryReader { proxy in
             Color.clear
                 .preference(key: PopoverPreferenceKey.self, value: proxy.size)
         })
     }
-}
-
-struct PopoverContent: View {
-    let config: SherpaConfig
     
-    var body: some View {
-        config.text
-            .padding(6)
+    func arrow() -> some View {
+        Image(systemName: "triangle.fill")
+            .resizable().aspectRatio(contentMode: .fit)
+            .foregroundColor(Color.white)
+            .frame(width: 15)
     }
 }
 
@@ -340,7 +361,7 @@ struct CutoutOverlay: Shape {
 }
 
 struct SherpaPreferenceKey: PreferenceKey {
-    typealias Value = [String: SherpaConfig]
+    typealias Value = [String: SherpaDetails]
     
     static var defaultValue: Value = [:]
     
