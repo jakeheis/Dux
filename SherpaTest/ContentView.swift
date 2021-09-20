@@ -122,17 +122,18 @@ struct CalloutConfig {
         case down
     }
     
-    static func text(_ text: String, direction: Direction = .up) -> Self {
-        .view(direction: direction) { Text(text) }
+    static func text(_ text: String, direction: Direction = .up, passthroughTouches: Bool = true) -> Self {
+        .view(direction: direction, passthroughTouches: passthroughTouches) { Text(text) }
     }
     
-    static func view<V: View>(direction: Direction = .up, @ViewBuilder content: () -> V) -> Self {
+    static func view<V: View>(direction: Direction = .up, passthroughTouches: Bool = true, @ViewBuilder content: () -> V) -> Self {
         let view = content().padding(6).background(RoundedRectangle(cornerRadius: 5).fill(Color.white))
-        return .init(body: AnyView(view), direction: direction)
+        return .init(body: AnyView(view), direction: direction, passthroughTouches: passthroughTouches)
     }
     
     let body: AnyView
     let direction: Direction
+    let passthroughTouches: Bool
 }
 
 struct HomeView: View {
@@ -145,7 +146,7 @@ struct HomeView: View {
             case .button:
                 return .text("Tap here!")
             case .detailView:
-                return .view(direction: .down) {
+                return .view(direction: .down, passthroughTouches: false) {
                     HStack {
                         Text("This takes you to a detail view")
                         Image(systemName: "chevron.right")
@@ -244,6 +245,15 @@ struct SherpaContainerView<Overlay: View, Content: View>: View {
                                 }
                                 .onTapGesture {
                                     current.onBackgroundTap(sherpa: guide)
+                                }
+                                
+                                if !details.config.passthroughTouches {
+                                    Color.black.opacity(0.05)
+                                        .frame(width: proxy[details.anchor].width, height: proxy[details.anchor].height)
+                                        .offset(x: proxy[details.anchor].minX, y: proxy[details.anchor].minY)
+                                        .onTapGesture {
+                                            current.onBackgroundTap(sherpa: guide)
+                                        }
                                 }
                                 
                                 Popover(config: details.config)
