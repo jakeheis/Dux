@@ -49,15 +49,37 @@ struct GuidableView<Content: View, Plan: CaseIterable & RawRepresentable>: View 
     var body: some View {
         content
             .onAppear {
-                print("guide ON APPEEar")
                 if isActive {
                     sherpa.start(plan: steps)
                 }
             }
-            .onDisappear {
-                print("guide ON ISDSAPPEEar")
-                sherpa.stop()
+    }
+}
+
+struct SherpaNavigationLink<Destination: View, Label: View>: View {
+    let destination: Destination
+    let label: Label
+    @State private var isActive = false
+    
+    @EnvironmentObject var sherpa: SherpaGuide
+    
+    init(destination: Destination, @ViewBuilder label: () -> Label) {
+        self.destination = destination
+        self.label = label()
+    }
+
+    var body: some View {
+        ZStack {
+            NavigationLink(destination: destination, isActive: $isActive, label: { Text("") })
+            Button(action: tap) {
+                label
             }
+        }
+    }
+    
+    func tap() {
+        sherpa.stop()
+        isActive.toggle()
     }
 }
 
@@ -73,7 +95,7 @@ struct HomeView: View {
         VStack {
             Text("Hello, world!")
                 .padding()
-            NavigationLink(destination: DetailView()) {
+            SherpaNavigationLink(destination: DetailView()) {
                 Text("Detail view")
                     .sherpa(name: Plan.detailView)
             }
