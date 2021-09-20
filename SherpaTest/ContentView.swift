@@ -75,7 +75,9 @@ struct SherpaNavigationLink<Destination: View, Label: View>: View {
     }
     
     func tap() {
-        sherpa.stop()
+        withAnimation {
+            sherpa.stop()
+        }
         isActive.toggle()
     }
 }
@@ -115,7 +117,10 @@ struct HomeView: View {
                 .padding()
             SherpaNavigationLink(destination: DetailView()) {
                 Text("Detail view")
-                    .sherpa(name: Plan.detailView, text: "This takes you to a detail view")
+                    .sherpa(name: Plan.detailView, mark: HStack {
+                        Text("This takes you to a detail view")
+                        Image(systemName: "chevron.right")
+                    })
             }
             Button(action: { sherpa.advance() }) { Text("HEY") }
                 .sherpa(name: Plan.button, text: "Tap here!")
@@ -138,13 +143,17 @@ struct DetailView: View {
 
 struct SherpaConfig {
     let anchor: Anchor<CGRect>
-    let text: String
+    let text: AnyView
 }
 
 extension View {
     func sherpa<T: RawRepresentable>(name: T, text: String) -> some View where T.RawValue == String {
+        sherpa(name: name, mark: Text(text))
+    }
+    
+    func sherpa<T: RawRepresentable, Mark: View>(name: T, mark: Mark) -> some View where T.RawValue == String {
         anchorPreference(key: SherpaPreferenceKey.self, value: .bounds, transform: { anchor in
-            [name.rawValue: SherpaConfig(anchor: anchor, text: text)]
+            [name.rawValue: SherpaConfig(anchor: anchor, text: AnyView(mark))]
         })
     }
 }
@@ -267,7 +276,7 @@ struct PopoverContent: View {
     let config: SherpaConfig
     
     var body: some View {
-        Text(config.text)
+        config.text
             .padding(6)
     }
 }
