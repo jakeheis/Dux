@@ -47,7 +47,7 @@ struct GuidableView<Content: View, Plan: SherpaPlan>: View {
         content
             .onAppear {
                 if isActive {
-                    sherpa.start(plan: Plan.allCases.map { $0.rawValue })
+                    sherpa.start(plan: Plan.allCases.map { $0.key() })
                 }
             }
     }
@@ -87,14 +87,20 @@ struct SherpaMark {
     let content: AnyView
 }
 
-protocol SherpaPlan: RawRepresentable, CaseIterable where RawValue == String {
+protocol SherpaPlan: CaseIterable {
 //    associatedtype Mark: View
     
 //    func mark() -> SherpaMark
 }
 
+extension SherpaPlan {
+    func key() -> String {
+        String(reflecting: Self.self) + "." + String(describing: self)
+    }
+}
+
 struct HomeView: View {
-    enum Plan: String, SherpaPlan {
+    enum Plan: SherpaPlan {
         case button
         case detailView
 //
@@ -147,13 +153,13 @@ struct SherpaConfig {
 }
 
 extension View {
-    func sherpa<T: RawRepresentable>(name: T, text: String) -> some View where T.RawValue == String {
+    func sherpa<T: SherpaPlan>(name: T, text: String) -> some View {
         sherpa(name: name, mark: Text(text))
     }
     
-    func sherpa<T: RawRepresentable, Mark: View>(name: T, mark: Mark) -> some View where T.RawValue == String {
+    func sherpa<T: SherpaPlan, Mark: View>(name: T, mark: Mark) -> some View {
         anchorPreference(key: SherpaPreferenceKey.self, value: .bounds, transform: { anchor in
-            [name.rawValue: SherpaConfig(anchor: anchor, text: AnyView(mark))]
+            return [name.key(): SherpaConfig(anchor: anchor, text: AnyView(mark))]
         })
     }
 }
@@ -346,7 +352,7 @@ struct SherpaPreferenceKey: PreferenceKey {
     }
 }
 
-class SherpaGuide: ObservableObject {
+final class SherpaGuide: ObservableObject {
     enum State {
         case hidden
         case transition
@@ -399,9 +405,9 @@ class SherpaGuide: ObservableObject {
     }
     
     func stop() {
+        state = .hidden
         currentPlan = nil
         current = nil
-        state = .hidden
     }
 }
 
