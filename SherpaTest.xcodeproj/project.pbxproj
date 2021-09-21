@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		EF77462026FA46F0004EB611 /* DemoList.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF77461F26FA46F0004EB611 /* DemoList.swift */; };
 		EFF2E75A26F2474600737368 /* SherpaTestApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFF2E75926F2474600737368 /* SherpaTestApp.swift */; };
 		EFF2E75C26F2474600737368 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFF2E75B26F2474600737368 /* ContentView.swift */; };
 		EFF2E75E26F2474800737368 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EFF2E75D26F2474800737368 /* Assets.xcassets */; };
@@ -15,6 +16,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		EF77461F26FA46F0004EB611 /* DemoList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoList.swift; sourceTree = "<group>"; };
 		EFF2E75626F2474600737368 /* SherpaTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SherpaTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EFF2E75926F2474600737368 /* SherpaTestApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SherpaTestApp.swift; sourceTree = "<group>"; };
 		EFF2E75B26F2474600737368 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -56,6 +58,7 @@
 			children = (
 				EFF2E75926F2474600737368 /* SherpaTestApp.swift */,
 				EFF2E75B26F2474600737368 /* ContentView.swift */,
+				EF77461F26FA46F0004EB611 /* DemoList.swift */,
 				EFF2E76826F2475900737368 /* Sherpa.swift */,
 				EFF2E75D26F2474800737368 /* Assets.xcassets */,
 				EFF2E76226F2474800737368 /* Info.plist */,
@@ -143,6 +146,7 @@
 			files = (
 				EFF2E75C26F2474600737368 /* ContentView.swift in Sources */,
 				EFF2E76926F2475900737368 /* Sherpa.swift in Sources */,
+				EF77462026FA46F0004EB611 /* DemoList.swift in Sources */,
 				EFF2E75A26F2474600737368 /* SherpaTestApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

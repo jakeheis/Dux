@@ -12,7 +12,7 @@ struct SherpaTestApp: App {
     var body: some Scene {
         WindowGroup {
             SherpaContainerView(overlay: EndDemo()) {
-                ContentView()
+                DemoListView()
             }
         }
     }

@@ -127,13 +127,58 @@ struct CalloutConfig {
     }
     
     static func view<V: View>(direction: Direction = .up, passthroughTouches: Bool = true, @ViewBuilder content: () -> V) -> Self {
-        let view = content().padding(6).background(RoundedRectangle(cornerRadius: 5).fill(Color.white))
-        return .init(body: AnyView(view), direction: direction, passthroughTouches: passthroughTouches)
+        let inside = content()
+        let bodyBlock: (@escaping () -> Void) -> AnyView = { onTap in
+            AnyView(Button(action: onTap) {
+                inside
+            }
+            .buttonStyle(PopoverButtonStyle(direction: direction)))
+        }
+        
+        return .init(body: bodyBlock, direction: direction, passthroughTouches: passthroughTouches)
     }
     
-    let body: AnyView
+    let body: (_ onTap: @escaping () -> Void) -> AnyView
     let direction: Direction
     let passthroughTouches: Bool
+}
+
+struct PopoverButtonStyle: ButtonStyle {
+    let direction: CalloutConfig.Direction
+    
+    private func color(for configuration: Configuration) -> Color {
+        configuration.isPressed ? Color(white: 0.8, opacity: 1.0) : Color.white
+    }
+    
+    private func arrow(for configuration: Configuration) -> some View {
+        Image(systemName: "triangle.fill")
+            .resizable().aspectRatio(contentMode: .fit)
+            .foregroundColor(color(for: configuration))
+            .frame(width: 15)
+            .shadow(radius: 1)
+            .clipped()
+    }
+    
+    func makeBody(configuration: Configuration) -> some View {
+        VStack(spacing: 0) {
+            if direction == .down {
+                arrow(for: configuration)
+                    .offset(y: 3)
+            }
+            configuration.label
+                .padding(6)
+                .background(
+                    RoundedRectangle(cornerRadius: 5)
+                        .fill(color(for: configuration))
+                        .shadow(radius: 1)
+                )
+            if direction == .up {
+                arrow(for: configuration)
+                    .rotationEffect(.degrees(180))
+                    .offset(y: -3)
+            }
+        }
+    }
 }
 
 struct HomeView: View {
@@ -225,21 +270,25 @@ struct SherpaContainerView<Overlay: View, Content: View>: View {
         }
     }
     
+    var colorOverlay: Color {
+        Color(white: 0.9, opacity: 0.4)
+    }
+    
     var body: some View {
         content
             .environmentObject(guide)
             .overlayPreferenceValue(SherpaPreferenceKey.self, { all in
                 ZStack {
                     if guide.state == .transition {
-                        Color.black.opacity(0.4)
+                        colorOverlay
                         if let details = currentDetails(from: all) {
-                            Popover(config: details.config).opacity(0)
+                            Popover(config: details.config, onTap: {}).opacity(0)
                         }
                     } else if guide.state == .active {
                         if let current = guide.current, let details = currentDetails(from: all) {
                             GeometryReader { proxy in
                                 ForEach(overlayFrames(for: proxy[details.anchor], screen: proxy.size)) { frame in
-                                    Color.black.opacity(0.4)
+                                    colorOverlay
                                         .frame(width: frame.rect.width, height: frame.rect.height)
                                         .offset(x: frame.rect.minX, y: frame.rect.minY)
                                 }
@@ -256,14 +305,13 @@ struct SherpaContainerView<Overlay: View, Content: View>: View {
                                         }
                                 }
                                 
-                                Popover(config: details.config)
-                                    .offset(
-                                        x: proxy[details.anchor].midX - popoverSize.width / 2,
-                                        y: details.config.direction == .up ? proxy[details.anchor].minY - popoverSize.height : proxy[details.anchor].maxY
-                                    )
-                                    .onTapGesture {
-                                        current.onExplanationTap(sherpa: guide)
-                                    }
+                                Popover(config: details.config, onTap: {
+                                    current.onExplanationTap(sherpa: guide)
+                                })
+                                .offset(
+                                    x: proxy[details.anchor].midX - popoverSize.width / 2,
+                                    y: details.config.direction == .up ? proxy[details.anchor].minY - popoverSize.height : proxy[details.anchor].maxY
+                                )
                                 overlay.environmentObject(guide)
                             }
                         } else {
@@ -322,31 +370,17 @@ struct SherpaContainerView<Overlay: View, Content: View>: View {
 
 struct Popover: View {
     let config: CalloutConfig
+    let onTap: () -> Void
     
     var body: some View {
-        VStack(spacing: 0) {
-            if config.direction == .down {
-                arrow()
-                    .offset(y: 3)
-            }
-            config.body
-            if config.direction == .up {
-                arrow()
-                    .rotationEffect(.degrees(180))
-                    .offset(y: -3)
-            }
-        }
+//        Button(action: onTap) {
+            config.body(onTap)
+//        }
         .overlay(GeometryReader { proxy in
             Color.clear
                 .preference(key: PopoverPreferenceKey.self, value: proxy.size)
         })
-    }
-    
-    func arrow() -> some View {
-        Image(systemName: "triangle.fill")
-            .resizable().aspectRatio(contentMode: .fit)
-            .foregroundColor(Color.white)
-            .frame(width: 15)
+//        .buttonStyle(PopoverButtonStyle())
     }
 }
 
@@ -474,11 +508,5 @@ final class SherpaGuide: ObservableObject {
         state = .hidden
         currentPlan = nil
         current = nil
-    }
-}
-
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
     }
 }
