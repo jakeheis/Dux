@@ -2,6 +2,8 @@
 
 Guide users through your SwiftUI app with coach marks.
 
+![Screenshot](.github/Screenshot.png)
+
 ## Installation
 
 In `Package.swift`:
