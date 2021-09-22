@@ -20,7 +20,7 @@ extension View {
         })
     }
     
-    func sherpaExtensionTag<T: SherpaTags>(_ tag: T, edge: Edge, size: CGFloat = 100) -> some View {
+    func sherpaExtensionTag<T: SherpaTags>(_ tag: T, touchMode: CutoutTouchMode = .advance, edge: Edge, size: CGFloat = 100) -> some View {
         let width: CGFloat? = (edge == .leading || edge == .trailing) ? size : nil
         let height: CGFloat? = (edge == .top || edge == .bottom) ? size : nil
         
@@ -32,7 +32,7 @@ extension View {
         case .bottom: alignment = .bottom
         }
         
-        return overlay(Color.clear.frame(maxWidth: .infinity, maxHeight: .infinity).frame(width: width, height: height).sherpaTag(tag).padding(Edge.Set(edge), -size), alignment: alignment)
+        return overlay(Color.clear.frame(maxWidth: .infinity, maxHeight: .infinity).frame(width: width, height: height).sherpaTag(tag, touchMode: touchMode).padding(Edge.Set(edge), -size), alignment: alignment)
     }
     
     func stopSherpa(_ sherpa: SherpaGuide, onLink navigationLink: Bool) -> some View {
@@ -68,16 +68,13 @@ final class SherpaGuide: ObservableObject {
 
     private var currentPlan: [String]?
     
-    func start<Tags: SherpaTags>(tags: Tags.Type, after interval: TimeInterval = 0.5) {
+    func start<Tags: SherpaTags>(tags: Tags.Type) {
         let plan = tags.allCases.map { $0.key() }
         currentPlan = plan
+        
         if plan.count > 0 {
+            moveTo(item: plan[0])
             current = plan[0]
-            DispatchQueue.main.asyncAfter(deadline: .now() + interval) {
-                withAnimation {
-                    self.publisher.state = .active
-                }
-            }
         }
     }
     
@@ -142,20 +139,27 @@ final class SherpaGuide: ObservableObject {
 struct GuidableView<Content: View, Tags: SherpaTags>: View {
     let isActive: Bool
     let content: Content
+    let startDelay: TimeInterval
     
     @EnvironmentObject private var sherpa: SherpaGuide
     
-    init(isActive: Bool, tags: Tags.Type, @ViewBuilder content: () -> Content) {
+    init(isActive: Bool, tags: Tags.Type, startDelay: TimeInterval = 0.5, @ViewBuilder content: () -> Content) {
         self.isActive = isActive
         self.content = content()
+        self.startDelay = startDelay
     }
     
     var body: some View {
         content
             .onAppear {
                 if isActive {
-                    sherpa.start(tags: Tags.self)
+                    DispatchQueue.main.asyncAfter(deadline: .now() + startDelay) {
+                        sherpa.start(tags: Tags.self)
+                    }
                 }
+            }
+            .onDisappear {
+                sherpa.stop()
             }
     }
 }

@@ -60,7 +60,7 @@ struct DemoView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .overlay(overlay, alignment: .bottom)
         .navigationBarTitleDisplayMode(.inline)
-        .sherpaExtensionTag(Tags.bar, edge: .top)
+        .sherpaExtensionTag(Tags.bar, touchMode: .passthrough, edge: .top)
         .guide(isActive: true, tags: Tags.self)
     }
     
