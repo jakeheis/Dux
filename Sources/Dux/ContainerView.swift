@@ -20,6 +20,7 @@ public struct DuxContainerView<Content: View>: View {
     
     public var body: some View {
         content
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .environmentObject(dux)
             .overlayPreferenceValue(DuxTagPreferenceKey.self, { all in
                 DuxOverlay(dux: dux, allRecordedItems: all, popoverSize: popoverSize, duxState: dux.statePublisher)
