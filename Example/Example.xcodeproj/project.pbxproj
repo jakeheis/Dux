@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -11,6 +11,7 @@
 		EF07403E26FBB11E00222198 /* BarDemo.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF07403D26FBB11E00222198 /* BarDemo.swift */; };
 		EF07404026FBB14800222198 /* CustomDemo.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF07403F26FBB14800222198 /* CustomDemo.swift */; };
 		EF07404226FBC33500222198 /* ManualDemo.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF07404126FBC33500222198 /* ManualDemo.swift */; };
+		EF07404B26FBCFCE00222198 /* Dux in Frameworks */ = {isa = PBXBuildFile; productRef = EF07404A26FBCFCE00222198 /* Dux */; };
 		EF84DC6326FB7EA9004A793C /* ExampleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF84DC6226FB7EA9004A793C /* ExampleApp.swift */; };
 		EF84DC6726FB7EAE004A793C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EF84DC6626FB7EAE004A793C /* Assets.xcassets */; };
 		EF84DC6A26FB7EAE004A793C /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EF84DC6926FB7EAE004A793C /* Preview Assets.xcassets */; };
@@ -35,6 +36,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EF07404B26FBCFCE00222198 /* Dux in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -98,6 +100,7 @@
 			);
 			name = Example;
 			packageProductDependencies = (
+				EF07404A26FBCFCE00222198 /* Dux */,
 			);
 			productName = Example;
 			productReference = EF84DC5F26FB7EA9004A793C /* Example.app */;
@@ -127,6 +130,7 @@
 			);
 			mainGroup = EF84DC5626FB7EA9004A793C;
 			packageReferences = (
+				EF07404926FBCFCE00222198 /* XCRemoteSwiftPackageReference "Dux" */,
 			);
 			productRefGroup = EF84DC6026FB7EA9004A793C /* Products */;
 			projectDirPath = "";
@@ -348,6 +352,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		EF07404926FBCFCE00222198 /* XCRemoteSwiftPackageReference "Dux" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "file:///Users/jakeheiser/Desktop/Projects/iOS/Dux";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		EF07404A26FBCFCE00222198 /* Dux */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EF07404926FBCFCE00222198 /* XCRemoteSwiftPackageReference "Dux" */;
+			productName = Dux;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = EF84DC5726FB7EA9004A793C /* Project object */;
 }

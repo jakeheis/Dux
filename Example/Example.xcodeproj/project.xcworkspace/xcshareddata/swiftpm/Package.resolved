@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "Dux",
+        "repositoryURL": "/Users/jakeheiser/Desktop/Projects/iOS/Dux",
+        "state": {
+          "branch": "main",
+          "revision": "be4990e894fea5f4a8a0843980e582698ab574b6",
+          "version": null
+        }
+      }
+    ]
+  },
+  "version": 1
+}
