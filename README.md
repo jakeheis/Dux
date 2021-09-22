@@ -1,5 +1,7 @@
 # Dux
 
+[![Build Status](https://github.com/jakeheis/Dux/workflows/Swift/badge.svg)](https://github.com/jakeheis/SwiftCLI/actions)
+
 Guide users through your SwiftUI app with coach marks.
 
 <img src=".github/Screenshot.png" width="240">
@@ -47,7 +49,7 @@ struct MyView: View {
 }
 ```
 
-See the `Examples` directory for examples of how to use `Dux`.
+See the `Examples` directory for more examples of how to use `Dux`.
 
 ## Attributions
 
