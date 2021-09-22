@@ -7,10 +7,10 @@
 
 import SwiftUI
 
-struct SkipButton: View {
+public struct SkipButton: View {
     @EnvironmentObject var dux: Dux
     
-    var body: some View {
+    public var body: some View {
         Button(action: quit) {
             Text("Skip")
                 .padding(10)
@@ -27,7 +27,7 @@ struct SkipButton: View {
     }
 }
 
-struct DuxContainerView<Content: View>: View {
+public struct DuxContainerView<Content: View>: View {
     @StateObject private var guide = Dux()
     
     let content: Content
@@ -35,16 +35,16 @@ struct DuxContainerView<Content: View>: View {
     
     @State private var popoverSize: CGSize = .zero
     
-    init<Accessory: View>(accessory: Accessory, @ViewBuilder content: () -> Content) {
+    public init<Accessory: View>(accessory: Accessory, @ViewBuilder content: () -> Content) {
         self.accessory = AnyView(accessory)
         self.content = content()
     }
     
-    init(@ViewBuilder content: () -> Content) {
+    public init(@ViewBuilder content: () -> Content) {
         self.init(accessory: EmptyView(), content: content)
     }
     
-    var body: some View {
+    public var body: some View {
         content
             .environmentObject(guide)
             .overlayPreferenceValue(DuxTagPreferenceKey.self, { all in

@@ -8,19 +8,19 @@
 import SwiftUI
 
 extension View {
-    func guide<Tags: DuxTags>(isActive: Bool, tags: Tags.Type) -> some View {
+    public func guide<Tags: DuxTags>(isActive: Bool, tags: Tags.Type) -> some View {
         GuidableView(isActive: isActive, tags: tags) {
             self
         }
     }
 
-    func duxTag<T: DuxTags>(_ tag: T, touchMode: CutoutTouchMode = .advance) -> some View {
+    public func duxTag<T: DuxTags>(_ tag: T, touchMode: CutoutTouchMode = .advance) -> some View {
         anchorPreference(key: DuxTagPreferenceKey.self, value: .bounds, transform: { anchor in
             return [tag.key(): DuxTagInfo(anchor: anchor, callout: tag.createCallout(), touchMode: touchMode)]
         })
     }
     
-    func duxExtensionTag<T: DuxTags>(_ tag: T, touchMode: CutoutTouchMode = .advance, edge: Edge, size: CGFloat = 100) -> some View {
+    public func duxExtensionTag<T: DuxTags>(_ tag: T, touchMode: CutoutTouchMode = .advance, edge: Edge, size: CGFloat = 100) -> some View {
         let width: CGFloat? = (edge == .leading || edge == .trailing) ? size : nil
         let height: CGFloat? = (edge == .top || edge == .bottom) ? size : nil
         
@@ -40,7 +40,7 @@ extension View {
         return overlay(overlayView, alignment: alignment)
     }
     
-    func stopDux(_ dux: Dux, onLink navigationLink: Bool) -> some View {
+    public func stopDux(_ dux: Dux, onLink navigationLink: Bool) -> some View {
         onChange(of: navigationLink, perform: { shown in
             if shown {
                 dux.stop()
@@ -48,7 +48,7 @@ extension View {
         })
     }
     
-    func stopDux<V: Hashable>(_ dux: Dux, onTag navigationTag: V, selection: V) -> some View {
+    public func stopDux<V: Hashable>(_ dux: Dux, onTag navigationTag: V, selection: V) -> some View {
         onChange(of: selection, perform: { value in
             if navigationTag == value {
                 dux.stop()
@@ -67,7 +67,7 @@ class DuxStatePublisher: ObservableObject {
     @Published var state: State = .hidden
 }
 
-final class Dux: ObservableObject {
+public final class Dux: ObservableObject {
     let statePublisher = DuxStatePublisher()
     private(set) var current: String? = nil
 
@@ -141,7 +141,7 @@ final class Dux: ObservableObject {
 }
 
 
-struct GuidableView<Content: View, Tags: DuxTags>: View {
+public struct GuidableView<Content: View, Tags: DuxTags>: View {
     let isActive: Bool
     let content: Content
     let startDelay: TimeInterval
@@ -154,7 +154,7 @@ struct GuidableView<Content: View, Tags: DuxTags>: View {
         self.startDelay = startDelay
     }
     
-    var body: some View {
+    public var body: some View {
         content
             .onAppear {
                 if isActive {
@@ -169,7 +169,7 @@ struct GuidableView<Content: View, Tags: DuxTags>: View {
     }
 }
 
-protocol DuxTags: CaseIterable {
+public protocol DuxTags: CaseIterable {
     func createCallout() -> Callout
 }
 

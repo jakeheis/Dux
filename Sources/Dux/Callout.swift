@@ -7,18 +7,18 @@
 
 import SwiftUI
 
-enum CutoutTouchMode {
+public enum CutoutTouchMode {
     case passthrough
     case advance
     case custom(() -> Void)
 }
 
-struct Callout {
-    static func text(_ text: String, edge: Edge = .top) -> Self {
+public struct Callout {
+    public static func text(_ text: String, edge: Edge = .top) -> Self {
         .view(edge: edge) { Text(text) }
     }
     
-    static func okText(_ text: String, edge: Edge = .top) -> Self {
+    public static func okText(_ text: String, edge: Edge = .top) -> Self {
         .view(edge: edge) {
             HStack {
                 Text(text)
@@ -30,7 +30,7 @@ struct Callout {
         }
     }
     
-    static func view<V: View>(edge: Edge = .top, @ViewBuilder content: () -> V) -> Self {
+    public static func view<V: View>(edge: Edge = .top, @ViewBuilder content: () -> V) -> Self {
         let inside = content()
         let bodyBlock: (@escaping () -> Void) -> AnyView = { onTap in
             AnyView(Button(action: onTap) {
@@ -43,12 +43,12 @@ struct Callout {
         return .init(body: bodyBlock, edge: edge)
     }
     
-    static func custom<V: View>(edge: Edge = .top, @ViewBuilder content: @escaping (_ onTap: @escaping () -> Void) -> V) -> Self {
+    public static func custom<V: View>(edge: Edge = .top, @ViewBuilder content: @escaping (_ onTap: @escaping () -> Void) -> V) -> Self {
         return .init(body: { onTap in AnyView(content(onTap)) }, edge: edge)
     }
     
-    let body: (_ onTap: @escaping () -> Void) -> AnyView
-    let edge: Edge
+    public let body: (_ onTap: @escaping () -> Void) -> AnyView
+    public let edge: Edge
     
     func createView(onTap: @escaping () -> Void) -> some View {
         body(onTap)
