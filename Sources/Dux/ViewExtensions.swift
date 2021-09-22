@@ -8,19 +8,19 @@
 import SwiftUI
 
 extension View {
-    public func guide<Tags: DuxTags>(isActive: Bool, tags: Tags.Type) -> some View {
-        GuidableView(isActive: isActive, tags: tags) {
+    public func dux<Tags: DuxTags>(isActive: Bool, tags: Tags.Type, delegate: DuxDelegate? = nil) -> some View {
+        GuidableView(isActive: isActive, tags: tags, delegate: delegate) {
             self
         }
     }
 
-    public func duxTag<T: DuxTags>(_ tag: T, touchMode: CutoutTouchMode = .advance) -> some View {
+    public func duxTag<T: DuxTags>(_ tag: T) -> some View {
         anchorPreference(key: DuxTagPreferenceKey.self, value: .bounds, transform: { anchor in
-            return [tag.key(): DuxTagInfo(anchor: anchor, callout: tag.createCallout(), touchMode: touchMode)]
+            return [tag.key(): DuxTagInfo(tag: tag.key(), anchor: anchor, callout: tag.createCallout())]
         })
     }
     
-    public func duxExtensionTag<T: DuxTags>(_ tag: T, touchMode: CutoutTouchMode = .advance, edge: Edge, size: CGFloat = 100) -> some View {
+    public func duxExtensionTag<T: DuxTags>(_ tag: T, edge: Edge, size: CGFloat = 100) -> some View {
         let width: CGFloat? = (edge == .leading || edge == .trailing) ? size : nil
         let height: CGFloat? = (edge == .top || edge == .bottom) ? size : nil
         
@@ -35,7 +35,7 @@ extension View {
         let overlayView = Color.clear
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .frame(width: width, height: height)
-            .duxTag(tag, touchMode: touchMode)
+            .duxTag(tag)
             .padding(Edge.Set(edge), -size)
         return overlay(overlayView, alignment: alignment)
     }

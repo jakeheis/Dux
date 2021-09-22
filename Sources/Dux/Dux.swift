@@ -7,30 +7,49 @@
 
 import SwiftUI
 
-class DuxStatePublisher: ObservableObject {
-    enum State {
-        case hidden
-        case transition
-        case active
+public protocol DuxDelegate {
+    func cutoutTouchMode(dux: Dux) -> CutoutTouchMode
+    func onBackgroundTap(dux: Dux)
+    func onCalloutTap(dux: Dux)
+}
+
+extension DuxDelegate {
+    func cutoutTouchMode(dux: Dux) -> CutoutTouchMode {
+        .advance
     }
     
-    @Published var state: State = .hidden
+    func onBackgroundTap(dux: Dux) {
+        dux.advance()
+    }
+    
+    func onCalloutTap(dux: Dux) {
+        dux.advance()
+    }
 }
+
+struct DefaultDuxDelegate: DuxDelegate {}
 
 public final class Dux: ObservableObject {
     let statePublisher = DuxStatePublisher()
-    private(set) var current: String? = nil
+    public private(set) var current: String? = nil
 
     private var currentPlan: [String]?
     
-    public func start<Tags: DuxTags>(tags: Tags.Type) {
+    var delegate: DuxDelegate = DefaultDuxDelegate()
+    
+    public func start<Tags: DuxTags>(tags: Tags.Type, delegate: DuxDelegate?) {
         let plan = tags.allCases.map { $0.key() }
         currentPlan = plan
+        self.delegate = delegate ?? DefaultDuxDelegate()
         
         if plan.count > 0 {
             moveTo(item: plan[0])
             current = plan[0]
         }
+    }
+    
+    func matchCurrent<T: DuxTags>(_ tags: T.Type) -> T? {
+        T.allCases.first(where: { $0.key() == current })
     }
     
     public func advance() {
@@ -93,33 +112,14 @@ public final class Dux: ObservableObject {
     }
 }
 
-
-public struct GuidableView<Content: View, Tags: DuxTags>: View {
-    let isActive: Bool
-    let content: Content
-    let startDelay: TimeInterval
-    
-    @EnvironmentObject private var dux: Dux
-    
-    init(isActive: Bool, tags: Tags.Type, startDelay: TimeInterval = 0.5, @ViewBuilder content: () -> Content) {
-        self.isActive = isActive
-        self.content = content()
-        self.startDelay = startDelay
+class DuxStatePublisher: ObservableObject {
+    enum State {
+        case hidden
+        case transition
+        case active
     }
     
-    public var body: some View {
-        content
-            .onAppear {
-                if isActive {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + startDelay) {
-                        dux.start(tags: Tags.self)
-                    }
-                }
-            }
-            .onDisappear {
-                dux.stop()
-            }
-    }
+    @Published var state: State = .hidden
 }
 
 public protocol DuxTags: CaseIterable {
