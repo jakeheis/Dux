@@ -34,16 +34,36 @@ extension View {
         
         return overlay(Color.clear.frame(maxWidth: .infinity, maxHeight: .infinity).frame(width: width, height: height).sherpaMark(name).padding(Edge.Set(edge), -size), alignment: alignment)
     }
+    
+    func stopSherpa(_ sherpa: SherpaGuide, onLink navigationLink: Bool) -> some View {
+        onChange(of: navigationLink, perform: { shown in
+            if shown {
+                sherpa.stop()
+            }
+        })
+    }
+    
+    func stopSherpa<V: Hashable>(_ sherpa: SherpaGuide, onTag navigationTag: V, selection: V) -> some View {
+        onChange(of: selection, perform: { value in
+            if navigationTag == value {
+                sherpa.stop()
+            }
+        })
+    }
 }
 
-final class SherpaGuide: ObservableObject {
+class SherpaPublisher: ObservableObject {
     enum State {
         case hidden
         case transition
         case active
     }
     
-    @Published private(set) var state: State = .hidden
+    @Published var state: State = .hidden
+}
+
+final class SherpaGuide: ObservableObject {
+    let publisher = SherpaPublisher()
     private(set) var current: String? = nil
 
     private var currentPlan: [String]?
@@ -55,7 +75,7 @@ final class SherpaGuide: ObservableObject {
             current = plan[0]
             DispatchQueue.main.asyncAfter(deadline: .now() + interval) {
                 withAnimation {
-                    self.state = .active
+                    self.publisher.state = .active
                 }
             }
         }
@@ -98,21 +118,21 @@ final class SherpaGuide: ObservableObject {
         self.current = item
         
         withAnimation {
-            if state == .active {
-                self.state = .transition
+            if publisher.state == .active {
+                self.publisher.state = .transition
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     withAnimation {
-                        self.state = .active
+                        self.publisher.state = .active
                     }
                 }
             } else {
-                self.state = .active
+                self.publisher.state = .active
             }
         }
     }
     
     private func stopImpl() {
-        state = .hidden
+        publisher.state = .hidden
         currentPlan = nil
         current = nil
     }

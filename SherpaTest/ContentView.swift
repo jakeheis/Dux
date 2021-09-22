@@ -48,7 +48,7 @@ struct HomeView: View {
                 .padding()
             NavigationLink(destination: DetailView(), isActive: $detailLinkActive) {
                 Text("Detail view")
-                    .sherpaMark(Plan.detailView, touchMode: .custom(detailViewSherpaTap))
+                    .sherpaMark(Plan.detailView, touchMode: .passthrough)
             }
             Button(action: { sherpa.advance() }) { Text("HEY") }
                 .sherpaMark(Plan.button, touchMode: .passthrough)
@@ -56,20 +56,26 @@ struct HomeView: View {
         .guide(isActive: true, plan: Plan.self)
         .navigationTitle("Home")
         .navigationBarTitleDisplayMode(.inline)
-    }
-    
-    func detailViewSherpaTap() {
-        sherpa.stop()
-        detailLinkActive = true
+        .stopSherpa(sherpa, onLink: detailLinkActive)
     }
 }
 
 struct DetailView: View {
     @EnvironmentObject var sherpa: SherpaGuide
     
+    enum Plan: SherpaPlan {
+        case details
+        
+        func config() -> CalloutConfig {
+            .text("Some details")
+        }
+    }
+    
     var body: some View {
         VStack {
             Text("Details")
+                .sherpaMark(Plan.details)
         }
+        .guide(isActive: true, plan: Plan.self)
     }
 }

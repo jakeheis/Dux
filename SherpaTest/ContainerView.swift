@@ -48,24 +48,37 @@ struct SherpaContainerView<Content: View>: View {
         content
             .environmentObject(guide)
             .overlayPreferenceValue(SherpaPreferenceKey.self, { all in
-                ZStack {
-                    if guide.state == .transition {
-                        Color(white: 0.8, opacity: 0.4)
-                            .edgesIgnoringSafeArea(.all)
-                        if let current = guide.current, let details = all[current] {
-                            Callout(config: details.config, onTap: {}).opacity(0)
-                        }
-                    } else if guide.state == .active {
-                        if let current = guide.current,  let details = all[current] {
-                            ActiveSherpaOverlay(details: details, guide: guide, popoverSize: popoverSize)
-                        }
-                    }
-                    if guide.state != .hidden {
-                        accessory.environmentObject(guide)
-                    }
-                }
+                SherpaOverlay(guide: guide, accessory: accessory, allRecordedItems: all, popoverSize: popoverSize, sherpaPublisher: guide.publisher)
             })
             .onPreferenceChange(CalloutPreferenceKey.self, perform: { popoverSize = $0 })
+    }
+}
+
+struct SherpaOverlay: View {
+    let guide: SherpaGuide
+    let accessory: AnyView
+    let allRecordedItems: SherpaPreferenceKey.Value
+    let popoverSize: CGSize
+
+    @ObservedObject var sherpaPublisher: SherpaPublisher
+    
+    var body: some View {
+        ZStack {
+            if guide.publisher.state == .transition {
+                Color(white: 0.8, opacity: 0.4)
+                    .edgesIgnoringSafeArea(.all)
+                if let current = guide.current, let details = allRecordedItems[current] {
+                    Callout(config: details.config, onTap: {}).opacity(0)
+                }
+            } else if guide.publisher.state == .active {
+                if let current = guide.current,  let details = allRecordedItems[current] {
+                    ActiveSherpaOverlay(details: details, guide: guide, popoverSize: popoverSize)
+                }
+            }
+            if guide.publisher.state != .hidden {
+                accessory.environmentObject(guide)
+            }
+        }
     }
 }
 
