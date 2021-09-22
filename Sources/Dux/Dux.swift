@@ -16,23 +16,23 @@ public protocol DuxDelegate {
 }
 
 extension DuxDelegate {
-    func accessoryView(dux: Dux) -> AnyView? {
+    public func accessoryView(dux: Dux) -> AnyView? {
         AnyView(SkipButton())
     }
     
-    func overlay(dux: Dux) -> AnyView? {
+    public func overlay(dux: Dux) -> AnyView? {
         AnyView(Color(white: 0.8, opacity: 0.5))
     }
     
-    func cutoutTouchMode(dux: Dux) -> CutoutTouchMode {
+    public func cutoutTouchMode(dux: Dux) -> CutoutTouchMode {
         .advance
     }
     
-    func onBackgroundTap(dux: Dux) {
+    public func onBackgroundTap(dux: Dux) {
         dux.advance()
     }
     
-    func onCalloutTap(dux: Dux) {
+    public func onCalloutTap(dux: Dux) {
         dux.advance()
     }
 }
@@ -58,7 +58,7 @@ public final class Dux: ObservableObject {
         }
     }
     
-    func matchCurrent<T: DuxTags>(_ tags: T.Type) -> T? {
+    public func matchCurrent<T: DuxTags>(_ tags: T.Type) -> T? {
         T.allCases.first(where: { $0.key() == current })
     }
     

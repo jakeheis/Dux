@@ -2,7 +2,7 @@
 
 Guide users through your SwiftUI app with coach marks.
 
-![Screenshot](.github/Screenshot.png)
+<img src=".github/Screenshot.png" width="240">
 
 ## Installation
 
@@ -46,3 +46,9 @@ struct MyView: View {
     }
 }
 ```
+
+See the `Examples` directory for examples of how to use `Dux`.
+
+## Attributions
+
+Inspired by https://github.com/ephread/Instructions
