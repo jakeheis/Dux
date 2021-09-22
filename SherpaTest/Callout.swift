@@ -47,41 +47,70 @@ struct CalloutConfig {
     let passthroughTouches: Bool
 }
 
-struct CalloutButtonStyle: ButtonStyle {
+struct CalloutBubble: Shape {
     let direction: CalloutConfig.Direction
     
-    private func color(for configuration: Configuration) -> Color {
-        configuration.isPressed ? Color(white: 0.8, opacity: 1.0) : Color.white
+    func path(in rect: CGRect) -> Path {
+        let pointerWidth: CGFloat = 10
+        let pointerHeight: CGFloat = 10
+        
+        var path = Path()
+        
+        let points: [CGPoint]
+        let frame: CGRect
+        switch direction {
+        case .down:
+            points = [
+                .init(x: rect.width / 2 - pointerWidth / 2, y: pointerHeight),
+                .init(x: rect.width / 2 + pointerWidth / 2, y: pointerHeight),
+                .init(x: rect.width / 2, y: 0)
+            ]
+            frame = .init(x: 0, y: pointerHeight, width: rect.width, height: rect.height - pointerHeight)
+        case .up:
+            points = [
+                .init(x: rect.width / 2 - pointerWidth / 2, y: rect.height - pointerHeight),
+                .init(x: rect.width / 2 + pointerWidth / 2, y: rect.height - pointerHeight),
+                .init(x: rect.width / 2, y: rect.height)
+            ]
+            frame = .init(x: 0, y: 0, width: rect.width, height: rect.height - pointerHeight)
+        }
+        
+        path.move(to: points.last!)
+        path.addLines(points)
+        path.addRoundedRect(in: frame, cornerSize: .init(width: 5, height: 5))
+        return path
     }
-    
-    private func arrow(for configuration: Configuration) -> some View {
-        Image(systemName: "triangle.fill")
-            .resizable().aspectRatio(contentMode: .fit)
-            .foregroundColor(color(for: configuration))
-            .frame(width: 15)
-            .shadow(radius: 1)
-            .clipped()
-    }
+}
+
+//struct CalloutBubblePreview: PreviewProvider {
+//    static var previews: some View {
+//        VStack {
+//            CalloutBubble(direction: .down).fill(Color.green).shadow(radius: 1).frame(width: 100, height: 50)
+//            CalloutBubble(direction: .up).fill(Color.green).shadow(radius: 1).frame(width: 100, height: 50)
+//        }
+//    }
+//}
+
+struct CalloutButtonStyle: ButtonStyle {
+    let direction: CalloutConfig.Direction
     
     func makeBody(configuration: Configuration) -> some View {
         VStack(spacing: 0) {
             if direction == .down {
-                arrow(for: configuration)
-                    .offset(y: 3)
+                Color.clear.frame(width: 1, height: 10)
             }
+            
             configuration.label
                 .padding(6)
-                .background(
-                    RoundedRectangle(cornerRadius: 5)
-                        .fill(color(for: configuration))
-                        .shadow(radius: 1)
-                )
+            
             if direction == .up {
-                arrow(for: configuration)
-                    .rotationEffect(.degrees(180))
-                    .offset(y: -3)
+                Color.clear.frame(width: 1, height: 10)
             }
-        }
+        }.background(
+            CalloutBubble(direction: direction)
+                .fill(configuration.isPressed ? Color(white: 0.8, opacity: 1.0) : Color.white)
+                .shadow(radius: 2)
+        )
     }
 }
 
