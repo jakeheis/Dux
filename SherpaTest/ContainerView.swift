@@ -7,23 +7,41 @@
 
 import SwiftUI
 
-extension SherpaContainerView where Overlay == EmptyView {
-    init(@ViewBuilder content: () -> Content) {
-        self.init(overlay: EmptyView(), content: content)
+struct SkipButton: View {
+    @EnvironmentObject var sherpa: SherpaGuide
+    
+    var body: some View {
+        Button(action: quit) {
+            Text("Skip")
+                .padding(10)
+                .background(RoundedRectangle(cornerRadius: 5).fill(Color.white).shadow(radius: 1))
+        }
+        .padding(.trailing, 8)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+    }
+    
+    func quit() {
+        withAnimation {
+            sherpa.stop()
+        }
     }
 }
 
-struct SherpaContainerView<Overlay: View, Content: View>: View {
+struct SherpaContainerView<Content: View>: View {
     @StateObject private var guide = SherpaGuide()
     
     let content: Content
-    let overlay: Overlay
+    let accessory: AnyView
     
     @State private var popoverSize: CGSize = .zero
     
-    init(overlay: Overlay, @ViewBuilder content: () -> Content) {
-        self.overlay = overlay
+    init<Accessory: View>(accessory: Accessory, @ViewBuilder content: () -> Content) {
+        self.accessory = AnyView(accessory)
         self.content = content()
+    }
+    
+    init(@ViewBuilder content: () -> Content) {
+        self.init(accessory: EmptyView(), content: content)
     }
     
     func currentDetails(from all: SherpaPreferenceKey.Value) -> SherpaDetails? {
@@ -34,8 +52,8 @@ struct SherpaContainerView<Overlay: View, Content: View>: View {
         }
     }
     
-    var colorOverlay: Color {
-        Color.blue.opacity(0.4)
+    var colorOverlay: some View {
+        Color(white: 0.8, opacity: 0.4)
     }
     
     var body: some View {
@@ -45,6 +63,7 @@ struct SherpaContainerView<Overlay: View, Content: View>: View {
                 ZStack {
                     if guide.state == .transition {
                         colorOverlay
+                            .edgesIgnoringSafeArea(.all)
                         if let details = currentDetails(from: all) {
                             Callout(config: details.config, onTap: {}).opacity(0)
                         }
@@ -76,14 +95,15 @@ struct SherpaContainerView<Overlay: View, Content: View>: View {
                                     x: proxy[details.anchor].midX - popoverSize.width / 2,
                                     y: details.config.direction == .up ? proxy[details.anchor].minY - popoverSize.height : proxy[details.anchor].maxY
                                 )
-                                overlay.environmentObject(guide)
-                            }
+                            }.edgesIgnoringSafeArea(.all)
                         } else {
                             failed(active: guide.current?.key())
                         }
                     }
-                    overlay.environmentObject(guide).opacity(guide.state != .hidden ? 0.4 : 0)
-                }.edgesIgnoringSafeArea(.all)
+                    if guide.state != .hidden {
+                        accessory.environmentObject(guide)
+                    }
+                }
             })
             .onPreferenceChange(CalloutPreferenceKey.self, perform: { popoverSize = $0 })
     }
