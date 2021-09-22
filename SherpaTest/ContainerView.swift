@@ -44,60 +44,20 @@ struct SherpaContainerView<Content: View>: View {
         self.init(accessory: EmptyView(), content: content)
     }
     
-    func currentDetails(from all: SherpaPreferenceKey.Value) -> SherpaDetails? {
-        if let current = guide.current, let details = all[current.key()] {
-            return details
-        } else {
-            return nil
-        }
-    }
-    
-    var colorOverlay: some View {
-        Color(white: 0.8, opacity: 0.4)
-    }
-    
     var body: some View {
         content
             .environmentObject(guide)
             .overlayPreferenceValue(SherpaPreferenceKey.self, { all in
                 ZStack {
                     if guide.state == .transition {
-                        colorOverlay
+                        Color(white: 0.8, opacity: 0.4)
                             .edgesIgnoringSafeArea(.all)
-                        if let details = currentDetails(from: all) {
+                        if let current = guide.current, let details = all[current] {
                             Callout(config: details.config, onTap: {}).opacity(0)
                         }
                     } else if guide.state == .active {
-                        if let current = guide.current, let details = currentDetails(from: all) {
-                            GeometryReader { proxy in
-                                ForEach(overlayFrames(for: proxy[details.anchor], screen: proxy.size)) { frame in
-                                    colorOverlay
-                                        .frame(width: frame.rect.width, height: frame.rect.height)
-                                        .offset(x: frame.rect.minX, y: frame.rect.minY)
-                                }
-                                .onTapGesture {
-                                    current.onBackgroundTap(sherpa: guide)
-                                }
-                                
-                                if !details.config.passthroughTouches {
-                                    Color.black.opacity(0.05)
-                                        .frame(width: proxy[details.anchor].width, height: proxy[details.anchor].height)
-                                        .offset(x: proxy[details.anchor].minX, y: proxy[details.anchor].minY)
-                                        .onTapGesture {
-                                            current.onBackgroundTap(sherpa: guide)
-                                        }
-                                }
-                                
-                                Callout(config: details.config, onTap: {
-                                    current.onExplanationTap(sherpa: guide)
-                                })
-                                .offset(
-                                    x: proxy[details.anchor].midX - popoverSize.width / 2,
-                                    y: details.config.direction == .up ? proxy[details.anchor].minY - popoverSize.height : proxy[details.anchor].maxY
-                                )
-                            }.edgesIgnoringSafeArea(.all)
-                        } else {
-                            failed(active: guide.current?.key())
+                        if let current = guide.current,  let details = all[current] {
+                            ActiveSherpaOverlay(details: details, guide: guide, popoverSize: popoverSize)
                         }
                     }
                     if guide.state != .hidden {
@@ -107,46 +67,73 @@ struct SherpaContainerView<Content: View>: View {
             })
             .onPreferenceChange(CalloutPreferenceKey.self, perform: { popoverSize = $0 })
     }
+}
+
+struct ActiveSherpaOverlay: View {
+    let details: SherpaDetails
+    let guide: SherpaGuide
+    let popoverSize: CGSize
     
-    func failed(active: String?) -> some View {
-        assertionFailure("Could not find plan view: '\(active ?? "<nil>")'")
-        return EmptyView()
+    var body: some View {
+        GeometryReader { proxy in
+            CutoutOverlay(cutoutFrame: proxy[details.anchor], screenSize: proxy.size)
+                .onTapGesture {
+                    guide.advance()
+                }
+
+            touchModeView(for: proxy[details.anchor], mode: details.touchMode)
+
+            Callout(config: details.config, onTap: {
+                guide.advance()
+            })
+            .offset(
+                x: proxy[details.anchor].midX - popoverSize.width / 2,
+                y: details.config.direction == .up ? proxy[details.anchor].minY - popoverSize.height : proxy[details.anchor].maxY
+            )
+        }.edgesIgnoringSafeArea(.all)
     }
     
-    func overlayFrames(for only: CGRect, screen: CGSize) -> [OverlayFrame] {
-//        var significantXCoordinates: Set<CGFloat> = []
-//        var significantYCoordinates: Set<CGFloat> = []
-//
-//        for rect in rects {
-//            significantXCoordinates.insert(rect.minX)
-//            significantXCoordinates.insert(rect.maxX)
-//            significantYCoordinates.insert(rect.minY)
-//            significantYCoordinates.insert(rect.maxY)
-//        }
-//
-//        let xs = significantXCoordinates.sorted()
-//        let ys = significantYCoordinates.sorted()
-//
-//        var overlayRects: [CGRect] = []
-//
-//
-//
-//        return Color.clear
-//            .edgesIgnoringSafeArea(.all)
-//            .onTapGesture { guide.show.toggle() }
-        
+    @ViewBuilder
+    func touchModeView(for cutout: CGRect, mode: CutoutTouchMode) -> some View {
+        switch mode {
+        case .passthrough: EmptyView()
+        case .advance:
+            Color.black.opacity(0.05)
+                .frame(width: cutout.width, height: cutout.height)
+                .offset(x: cutout.minX, y: cutout.minY)
+                .onTapGesture {
+                    guide.advance()
+                }
+        case .custom(let action):
+            Color.black.opacity(0.05)
+                .frame(width: cutout.width, height: cutout.height)
+                .offset(x: cutout.minX, y: cutout.minY)
+                .onTapGesture {
+                    action()
+                }
+        }
+    }
+}
+
+struct CutoutOverlay: View {
+    let cutoutFrame: CGRect
+    let screenSize: CGSize
+    
+    var overlayFrames: [OverlayFrame] {
         return [
-            .init(rect: .init(x: 0, y: 0, width: only.minX, height: screen.height)),
-            .init(rect: .init(x: only.maxX, y: 0, width: screen.width - only.maxX, height: screen.height)),
-            .init(rect: .init(x: only.minX, y: 0, width: only.width, height: only.minY)),
-            .init(rect: .init(x: only.minX, y: only.maxY, width: only.width, height: screen.height - only.maxY))
+            .init(rect: .init(x: 0, y: 0, width: cutoutFrame.minX, height: screenSize.height)),
+            .init(rect: .init(x: cutoutFrame.maxX, y: 0, width: screenSize.width - cutoutFrame.maxX, height: screenSize.height)),
+            .init(rect: .init(x: cutoutFrame.minX, y: 0, width: cutoutFrame.width, height: cutoutFrame.minY)),
+            .init(rect: .init(x: cutoutFrame.minX, y: cutoutFrame.maxY, width: cutoutFrame.width, height: screenSize.height - cutoutFrame.maxY))
         ]
-//        Color.black.opacity(0.4)
-//            .edgesIgnoringSafeArea(.all)
-//            .onTapGesture(perform: { print("TAP before") })
-//                            .mask(CutoutOverlay(proxy: proxy, anchors: anchors).fill(style: FillStyle(eoFill: true)))
-//                            .clipShape(CutoutOverlay(proxy: proxy, anchors: anchors), style: FillStyle(eoFill: true))
-//                            .contentShape(CutoutOverlay(proxy: proxy, anchors: anchors), eoFill: true)
+    }
+    
+    var body: some View {
+        ForEach(overlayFrames) { frame in
+            Color(white: 0.8, opacity: 0.4)
+                .frame(width: frame.rect.width, height: frame.rect.height)
+                .offset(x: frame.rect.minX, y: frame.rect.minY)
+        }
     }
 }
 
@@ -158,31 +145,10 @@ struct OverlayFrame: Identifiable {
     }
 }
 
-struct Ten: Shape {
-    func path(in rect: CGRect) -> Path {
-        Path(CGRect(x: rect.midX - 10, y: rect.midY + 5, width: 20, height: 20))
-    }
-}
-
-struct CutoutOverlay: Shape {
-    let cutouts: [CGRect]
-    
-    init(proxy: GeometryProxy, anchors: [Anchor<CGRect>]) {
-        cutouts = anchors.map { proxy[$0] }
-    }
-    
-    func path(in rect: CGRect) -> Path {
-        var path = Path(rect)
-        for cutout in cutouts {
-            path.addRect(cutout)
-        }
-        return path
-    }
-}
-
 struct SherpaDetails {
     let anchor: Anchor<CGRect>
     let config: CalloutConfig
+    let touchMode: CutoutTouchMode
 }
 
 struct SherpaPreferenceKey: PreferenceKey {
@@ -198,31 +164,31 @@ struct SherpaPreferenceKey: PreferenceKey {
     }
 }
 
-struct SherpaNavigationLink<Destination: View, Label: View>: View {
-    let destination: Destination
-    let label: Label
-    @State private var isActive = false
-    
-    @EnvironmentObject var sherpa: SherpaGuide
-    
-    init(destination: Destination, @ViewBuilder label: () -> Label) {
-        self.destination = destination
-        self.label = label()
-    }
-
-    var body: some View {
-        ZStack {
-            NavigationLink(destination: destination, isActive: $isActive, label: { Text("") })
-            Button(action: tap) {
-                label
-            }
-        }
-    }
-    
-    func tap() {
-        withAnimation {
-            sherpa.stop()
-        }
-        isActive.toggle()
-    }
-}
+//struct SherpaNavigationLink<Destination: View, Label: View>: View {
+//    let destination: Destination
+//    let label: Label
+//    @State private var isActive = false
+//    
+//    @EnvironmentObject var sherpa: SherpaGuide
+//    
+//    init(destination: Destination, @ViewBuilder label: () -> Label) {
+//        self.destination = destination
+//        self.label = label()
+//    }
+//
+//    var body: some View {
+//        ZStack {
+//            NavigationLink(destination: destination, isActive: $isActive, label: { Text("") })
+//            Button(action: tap) {
+//                label
+//            }
+//        }
+//    }
+//    
+//    func tap() {
+//        withAnimation {
+//            sherpa.stop()
+//        }
+//        isActive.toggle()
+//    }
+//}

@@ -29,7 +29,7 @@ struct HomeView: View {
             case .button:
                 return .text("Tap here!")
             case .detailView:
-                return .view(direction: .down, passthroughTouches: false) {
+                return .view(direction: .down) {
                     HStack {
                         Text("This takes you to a detail view")
                         Image(systemName: "chevron.right")
@@ -40,21 +40,27 @@ struct HomeView: View {
     }
     
     @EnvironmentObject var sherpa: SherpaGuide
+    @State var detailLinkActive = false
     
     var body: some View {
         VStack {
             Text("Hello, world!")
                 .padding()
-            SherpaNavigationLink(destination: DetailView()) {
+            NavigationLink(destination: DetailView(), isActive: $detailLinkActive) {
                 Text("Detail view")
-                    .sherpaMark(Plan.detailView)
+                    .sherpaMark(Plan.detailView, touchMode: .custom(detailViewSherpaTap))
             }
             Button(action: { sherpa.advance() }) { Text("HEY") }
-                .sherpaMark(Plan.button)
+                .sherpaMark(Plan.button, touchMode: .passthrough)
         }
         .guide(isActive: true, plan: Plan.self)
         .navigationTitle("Home")
         .navigationBarTitleDisplayMode(.inline)
+    }
+    
+    func detailViewSherpaTap() {
+        sherpa.stop()
+        detailLinkActive = true
     }
 }
 

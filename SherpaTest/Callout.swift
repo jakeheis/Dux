@@ -20,17 +20,23 @@ struct Callout: View {
     }
 }
 
+enum CutoutTouchMode {
+    case passthrough
+    case advance
+    case custom(() -> Void)
+}
+
 struct CalloutConfig {
     enum Direction {
         case up
         case down
     }
     
-    static func text(_ text: String, direction: Direction = .up, passthroughTouches: Bool = true) -> Self {
-        .view(direction: direction, passthroughTouches: passthroughTouches) { Text(text) }
+    static func text(_ text: String, direction: Direction = .up) -> Self {
+        .view(direction: direction) { Text(text) }
     }
     
-    static func view<V: View>(direction: Direction = .up, passthroughTouches: Bool = true, @ViewBuilder content: () -> V) -> Self {
+    static func view<V: View>(direction: Direction = .up, @ViewBuilder content: () -> V) -> Self {
         let inside = content()
         let bodyBlock: (@escaping () -> Void) -> AnyView = { onTap in
             AnyView(Button(action: onTap) {
@@ -39,12 +45,11 @@ struct CalloutConfig {
             .buttonStyle(CalloutButtonStyle(direction: direction)))
         }
         
-        return .init(body: bodyBlock, direction: direction, passthroughTouches: passthroughTouches)
+        return .init(body: bodyBlock, direction: direction)
     }
     
     let body: (_ onTap: @escaping () -> Void) -> AnyView
     let direction: Direction
-    let passthroughTouches: Bool
 }
 
 struct CalloutBubble: Shape {

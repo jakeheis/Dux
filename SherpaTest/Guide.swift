@@ -14,9 +14,9 @@ extension View {
         }
     }
 
-    func sherpaMark<T: SherpaPlan>(_ name: T) -> some View {
+    func sherpaMark<T: SherpaPlan>(_ name: T, touchMode: CutoutTouchMode = .advance) -> some View {
         anchorPreference(key: SherpaPreferenceKey.self, value: .bounds, transform: { anchor in
-            return [name.key(): SherpaDetails(anchor: anchor, config: name.config())]
+            return [name.key(): SherpaDetails(anchor: anchor, config: name.config(), touchMode: touchMode)]
         })
     }
     
@@ -44,15 +44,15 @@ final class SherpaGuide: ObservableObject {
     }
     
     @Published private(set) var state: State = .hidden
-    private(set) var current: SherpaPlanItem? = nil
+    private(set) var current: String? = nil
 
-    private var currentPlan: [SherpaPlanItem]?
+    private var currentPlan: [String]?
     
     func advance() {
         guard let current = current, let currentPlan = currentPlan else {
             return
         }
-        guard let index = currentPlan.firstIndex(where: { $0.key() == current.key() }) else {
+        guard let index = currentPlan.firstIndex(of: current) else {
             return
         }
         
@@ -77,7 +77,8 @@ final class SherpaGuide: ObservableObject {
         }
     }
     
-    func start(plan: [SherpaPlanItem], after interval: TimeInterval = 0.5) {
+    func start<Plan: SherpaPlan>(plan: Plan.Type, after interval: TimeInterval = 0.5) {
+        let plan = plan.allCases.map { $0.key() }
         currentPlan = plan
         if plan.count > 0 {
             current = plan[0]
@@ -126,33 +127,18 @@ struct GuidableView<Content: View, Plan: SherpaPlan>: View {
         content
             .onAppear {
                 if isActive {
-                    sherpa.start(plan: Array(Plan.allCases))
+                    sherpa.start(plan: Plan.self)
                 }
             }
     }
 }
 
-protocol SherpaPlanItem {
+protocol SherpaPlan: CaseIterable {
     func config() -> CalloutConfig
-    
-    func onExplanationTap(sherpa: SherpaGuide)
-    func onBackgroundTap(sherpa: SherpaGuide)
 }
 
-extension SherpaPlanItem {
+extension SherpaPlan {
     func key() -> String {
         String(reflecting: Self.self) + "." + String(describing: self)
     }
-    
-    func onExplanationTap(sherpa: SherpaGuide) {
-        sherpa.advance()
-    }
-    
-    func onBackgroundTap(sherpa: SherpaGuide) {
-        sherpa.advance()
-    }
-}
-
-protocol SherpaPlan: CaseIterable, SherpaPlanItem {
-    func config() -> CalloutConfig
 }

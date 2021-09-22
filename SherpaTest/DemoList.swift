@@ -108,7 +108,7 @@ struct DefaultDemo: View {
     
     func defaultDemo(plan: DemoView.Plan) -> CalloutConfig {
         switch plan {
-        case .bar: return .text("You are in the profile section, where you can review all info.", direction: .down, passthroughTouches: false)
+        case .bar: return .text("You are in the profile section, where you can review all info.", direction: .down)
         case .name: return .text("That, here, is your name.")
         case .email: return .text("That is your email address")
         }
