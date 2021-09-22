@@ -35,7 +35,7 @@ struct SherpaContainerView<Overlay: View, Content: View>: View {
     }
     
     var colorOverlay: Color {
-        Color(white: 0.9, opacity: 0.4)
+        Color.blue.opacity(0.4)
     }
     
     var body: some View {
@@ -121,8 +121,6 @@ struct SherpaContainerView<Overlay: View, Content: View>: View {
             .init(rect: .init(x: only.minX, y: 0, width: only.width, height: only.minY)),
             .init(rect: .init(x: only.minX, y: only.maxY, width: only.width, height: screen.height - only.maxY))
         ]
-
-        
 //        Color.black.opacity(0.4)
 //            .edgesIgnoringSafeArea(.all)
 //            .onTapGesture(perform: { print("TAP before") })

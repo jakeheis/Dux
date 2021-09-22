@@ -19,6 +19,21 @@ extension View {
             return [name.key(): SherpaDetails(anchor: anchor, config: name.config())]
         })
     }
+    
+    func sherpaExternalMark<T: SherpaPlan>(_ name: T, edge: Edge, size: CGFloat = 100) -> some View {
+        let width: CGFloat? = (edge == .leading || edge == .trailing) ? size : nil
+        let height: CGFloat? = (edge == .top || edge == .bottom) ? size : nil
+        
+        let alignment: Alignment
+        switch edge {
+        case .top: alignment = .top
+        case .leading: alignment = .leading
+        case .trailing: alignment = .trailing
+        case .bottom: alignment = .bottom
+        }
+        
+        return overlay(Color.clear.frame(maxWidth: .infinity, maxHeight: .infinity).frame(width: width, height: height).sherpaMark(name).padding(Edge.Set(edge), -size), alignment: alignment)
+    }
 }
 
 final class SherpaGuide: ObservableObject {

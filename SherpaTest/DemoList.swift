@@ -9,12 +9,14 @@ import SwiftUI
 
 struct DemoListView: View {
     var body: some View {
-        NavigationView {
-            List {
-                NavigationLink(destination: DefaultDemo()) {
-                    Text("Default")
+        TabView {
+            NavigationView {
+                List {
+                    NavigationLink(destination: DefaultDemo()) {
+                        Text("Default")
+                    }
                 }
-            }
+            }.tabItem { Text("SUP") }
         }
     }
 }
@@ -25,7 +27,7 @@ struct DemoView: View {
     static var currentDemo: ((Plan) -> CalloutConfig)?
     
     enum Plan: SherpaPlan {
-//        case bar
+        case bar
         case name
         case email
         
@@ -54,6 +56,7 @@ struct DemoView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .overlay(overlay, alignment: .bottom)
         .navigationBarTitleDisplayMode(.inline)
+        .sherpaExternalMark(Plan.bar, edge: .top)
         .guide(isActive: true, plan: Plan.self)
     }
     
@@ -105,7 +108,7 @@ struct DefaultDemo: View {
     
     func defaultDemo(plan: DemoView.Plan) -> CalloutConfig {
         switch plan {
-//        case .bar: return .text("YO")
+        case .bar: return .text("You are in the profile section, where you can review all info.", direction: .down, passthroughTouches: false)
         case .name: return .text("That, here, is your name.")
         case .email: return .text("That is your email address")
         }
