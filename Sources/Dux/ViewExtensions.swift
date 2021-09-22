@@ -16,7 +16,7 @@ extension View {
 
     public func duxTag<T: DuxTags>(_ tag: T) -> some View {
         anchorPreference(key: DuxTagPreferenceKey.self, value: .bounds, transform: { anchor in
-            return [tag.key(): DuxTagInfo(tag: tag.key(), anchor: anchor, callout: tag.createCallout())]
+            return [tag.key(): DuxTagInfo(anchor: anchor, callout: tag.createCallout())]
         })
     }
     

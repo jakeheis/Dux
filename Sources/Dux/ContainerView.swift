@@ -50,7 +50,7 @@ public struct SkipButton: View {
     }
 }
 
-struct DuxOverlay: View {
+private struct DuxOverlay: View {
     let dux: Dux
     let allRecordedItems: DuxTagPreferenceKey.Value
     let popoverSize: CGSize
@@ -73,6 +73,97 @@ struct DuxOverlay: View {
             if duxState.state != .hidden {
                 dux.delegate.accessoryView(dux: dux).environmentObject(dux)
             }
+        }
+    }
+}
+
+private struct ActiveDuxOverlay: View {
+    let tagInfo: DuxTagInfo
+    let dux: Dux
+    let popoverSize: CGSize
+    
+    var body: some View {
+        GeometryReader { proxy in
+            cutoutTint(for: proxy[tagInfo.anchor], screenSize: proxy.size)
+                .onTapGesture {
+                    dux.delegate.onBackgroundTap(dux: dux)
+                }
+
+            touchModeView(for: proxy[tagInfo.anchor], mode: dux.delegate.cutoutTouchMode(dux: dux))
+
+            tagInfo.callout.createView(onTap: { dux.delegate.onCalloutTap(dux: dux) })
+                .offset(
+                    x: cutoutOffsetX(cutout: proxy[tagInfo.anchor]),
+                    y: cutoutOffsetY(cutout: proxy[tagInfo.anchor])
+                )
+        }.edgesIgnoringSafeArea(.all)
+    }
+    
+    @ViewBuilder
+    private func cutoutTint(for cutoutFrame: CGRect, screenSize: CGSize) -> some View {
+        ZStack(alignment: .topLeading) {
+            if cutoutFrame.minX > 0 {
+                dux.delegate.overlay(dux: dux)
+                    .frame(width: cutoutFrame.minX, height: screenSize.height)
+            }
+            if cutoutFrame.maxX < screenSize.width {
+                dux.delegate.overlay(dux: dux)
+                    .frame(width: screenSize.width - cutoutFrame.maxX, height: screenSize.height)
+                    .offset(x: cutoutFrame.maxX)
+            }
+            if cutoutFrame.minY > 0 {
+                dux.delegate.overlay(dux: dux)
+                    .frame(width: cutoutFrame.width, height: cutoutFrame.minY)
+                    .offset(x: cutoutFrame.minX)
+            }
+            if cutoutFrame.maxY < screenSize.height {
+                dux.delegate.overlay(dux: dux)
+                    .frame(width: cutoutFrame.width, height: screenSize.height - cutoutFrame.maxY)
+                    .offset(x: cutoutFrame.minX, y: cutoutFrame.maxY)
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private func touchModeView(for cutout: CGRect, mode: CutoutTouchMode) -> some View {
+        switch mode {
+        case .passthrough: EmptyView()
+        case .advance:
+            Color.black.opacity(0.05)
+                .frame(width: cutout.width, height: cutout.height)
+                .offset(x: cutout.minX, y: cutout.minY)
+                .onTapGesture {
+                    dux.advance()
+                }
+        case .custom(let action):
+            Color.black.opacity(0.05)
+                .frame(width: cutout.width, height: cutout.height)
+                .offset(x: cutout.minX, y: cutout.minY)
+                .onTapGesture {
+                    action()
+                }
+        }
+    }
+    
+    private func cutoutOffsetX(cutout: CGRect) -> CGFloat {
+        switch tagInfo.callout.edge {
+        case .top, .bottom:
+            return cutout.midX - popoverSize.width / 2
+        case .leading:
+            return cutout.minX - popoverSize.width
+        case .trailing:
+            return cutout.maxX
+        }
+    }
+    
+    private func cutoutOffsetY(cutout: CGRect) -> CGFloat {
+        switch tagInfo.callout.edge {
+        case .leading, .trailing:
+            return cutout.midY - popoverSize.height / 2
+        case .top:
+            return cutout.minY - popoverSize.height
+        case .bottom:
+            return cutout.maxY
         }
     }
 }
@@ -112,105 +203,7 @@ public struct GuidableView<Content: View, Tags: DuxTags>: View {
     }
 }
 
-struct ActiveDuxOverlay: View {
-    let tagInfo: DuxTagInfo
-    let dux: Dux
-    let popoverSize: CGSize
-    
-    func offsetX(cutout: CGRect) -> CGFloat {
-        switch tagInfo.callout.edge {
-        case .top, .bottom:
-            return cutout.midX - popoverSize.width / 2
-        case .leading:
-            return cutout.minX - popoverSize.width
-        case .trailing:
-            return cutout.maxX
-        }
-    }
-    
-    func offsetY(cutout: CGRect) -> CGFloat {
-        switch tagInfo.callout.edge {
-        case .leading, .trailing:
-            return cutout.midY - popoverSize.height / 2
-        case .top:
-            return cutout.minY - popoverSize.height
-        case .bottom:
-            return cutout.maxY
-        }
-    }
-    
-    var body: some View {
-        GeometryReader { proxy in
-            CutoutOverlay(dux: dux, cutoutFrame: proxy[tagInfo.anchor], screenSize: proxy.size)
-                .onTapGesture {
-                    dux.delegate.onBackgroundTap(dux: dux)
-                }
-
-            touchModeView(for: proxy[tagInfo.anchor], mode: dux.delegate.cutoutTouchMode(dux: dux))
-
-            tagInfo.callout.createView(onTap: { dux.delegate.onCalloutTap(dux: dux) })
-                .offset(
-                    x: offsetX(cutout: proxy[tagInfo.anchor]),
-                    y: offsetY(cutout: proxy[tagInfo.anchor])
-                )
-        }.edgesIgnoringSafeArea(.all)
-    }
-    
-    @ViewBuilder
-    func touchModeView(for cutout: CGRect, mode: CutoutTouchMode) -> some View {
-        switch mode {
-        case .passthrough: EmptyView()
-        case .advance:
-            Color.black.opacity(0.05)
-                .frame(width: cutout.width, height: cutout.height)
-                .offset(x: cutout.minX, y: cutout.minY)
-                .onTapGesture {
-                    dux.advance()
-                }
-        case .custom(let action):
-            Color.black.opacity(0.05)
-                .frame(width: cutout.width, height: cutout.height)
-                .offset(x: cutout.minX, y: cutout.minY)
-                .onTapGesture {
-                    action()
-                }
-        }
-    }
-}
-
-struct CutoutOverlay: View {
-    let dux: Dux
-    let cutoutFrame: CGRect
-    let screenSize: CGSize
-    
-    var overlayFrames: [OverlayFrame] {
-        return [
-            .init(rect: .init(x: 0, y: 0, width: cutoutFrame.minX, height: screenSize.height)),
-            .init(rect: .init(x: cutoutFrame.maxX, y: 0, width: screenSize.width - cutoutFrame.maxX, height: screenSize.height)),
-            .init(rect: .init(x: cutoutFrame.minX, y: 0, width: cutoutFrame.width, height: cutoutFrame.minY)),
-            .init(rect: .init(x: cutoutFrame.minX, y: cutoutFrame.maxY, width: cutoutFrame.width, height: screenSize.height - cutoutFrame.maxY))
-        ]
-    }
-    
-    var body: some View {
-        ForEach(overlayFrames) { frame in
-            dux.delegate.overlay(dux: dux)
-                .frame(width: frame.rect.width, height: frame.rect.height)
-                .offset(x: frame.rect.minX, y: frame.rect.minY)
-        }
-    }
-}
-
-struct OverlayFrame: Identifiable {
-    let rect: CGRect
-    
-    var id: String {
-        rect.debugDescription
-    }
-}
-
 struct DuxTagInfo {
-    let tag: String
     let anchor: Anchor<CGRect>
     let callout: Callout
 }
