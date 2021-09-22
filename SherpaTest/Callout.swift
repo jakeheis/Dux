@@ -61,6 +61,10 @@ struct CalloutConfig {
         return .init(body: bodyBlock, direction: direction)
     }
     
+    static func custom<V: View>(direction: Direction = .up, @ViewBuilder content: @escaping (_ onTap: @escaping () -> Void) -> V) -> Self {
+        return .init(body: { onTap in AnyView(content(onTap)) }, direction: direction)
+    }
+    
     let body: (_ onTap: @escaping () -> Void) -> AnyView
     let direction: Direction
 }

@@ -9,18 +9,19 @@ import SwiftUI
 
 struct DemoListView: View {
     var body: some View {
-        TabView {
-            NavigationView {
-                List {
-                    NavigationLink(destination: DefaultDemo()) {
-                        Text("Default")
-                    }
-                    NavigationLink(destination: HintOnlyDemo()) {
-                        Text("Hint only")
-                    }
+        NavigationView {
+            List {
+                NavigationLink(destination: DefaultDemo()) {
+                    Text("Default")
                 }
-            }.tabItem { Text("SUP") }
-        }
+                NavigationLink(destination: HintOnlyDemo()) {
+                    Text("Hint only")
+                }
+                NavigationLink(destination: CustomDemo()) {
+                    Text("Custom")
+                }
+            }
+        }.tabItem { Text("SUP") }
     }
 }
 
@@ -97,7 +98,7 @@ struct DemoViewPreview: PreviewProvider {
     static var previews: some View {
         SherpaContainerView {
             NavigationView {
-                DefaultDemo()
+                CustomDemo()
             }
         }
     }
@@ -132,5 +133,51 @@ struct HintOnlyDemo: View {
         }
     }
 }
+
+struct CustomDemo: View {
+    var body: some View {
+        DemoView(demo: demo)
+            .navigationTitle("Default")
+    }
+    
+    func demo(plan: DemoView.Plan) -> CalloutConfig {
+        switch plan {
+        case .bar: return .custom(direction: .down) { onTap in
+            CustomBubble(text: "You are in the profile section, where you can review all info.", onTap: onTap)
+        }
+        case .name: return .custom(direction: .down) { onTap in
+            CustomBubble(text: "That, here, is your name.", onTap: onTap)
+        }
+        case .email: return .text("That is your email address")
+        }
+    }
+    
+    struct CustomBubble: View {
+        let text: String
+        let onTap: () -> Void
+        
+        var body: some View {
+            VStack {
+                Image(systemName: "arrow.up")
+                    .resizable().aspectRatio(contentMode: .fit)
+                    .frame(width: 30)
+                    .padding()
+                HStack {
+                    Text(text)
+                    Button(action: onTap) {
+                        Text("Ok!")
+                            .foregroundColor(.white)
+                            .padding()
+                            .background(RoundedRectangle(cornerRadius: 5).fill(Color.blue))
+                    }
+                }
+                .padding()
+                .background(RoundedRectangle(cornerRadius: 5).fill(Color.white))
+            }
+        }
+    }
+}
+
+
 
 //struct
