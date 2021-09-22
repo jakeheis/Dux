@@ -48,35 +48,6 @@ final class SherpaGuide: ObservableObject {
 
     private var currentPlan: [String]?
     
-    func advance() {
-        guard let current = current, let currentPlan = currentPlan else {
-            return
-        }
-        guard let index = currentPlan.firstIndex(of: current) else {
-            return
-        }
-        
-        guard index + 1 < currentPlan.count else {
-            stop()
-            return
-        }
-        
-        self.current = currentPlan[index + 1]
-        
-        withAnimation {
-            if state == .active {
-                self.state = .transition
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    withAnimation {
-                        self.state = .active
-                    }
-                }
-            } else {
-                self.state = .active
-            }
-        }
-    }
-    
     func start<Plan: SherpaPlan>(plan: Plan.Type, after interval: TimeInterval = 0.5) {
         let plan = plan.allCases.map { $0.key() }
         currentPlan = plan
@@ -90,10 +61,29 @@ final class SherpaGuide: ObservableObject {
         }
     }
     
-    func hide() {
-        state = .hidden
+    func advance() {
+        guard let current = current, let currentPlan = currentPlan else {
+            return
+        }
+        guard let index = currentPlan.firstIndex(of: current) else {
+            return
+        }
+        
+        guard index + 1 < currentPlan.count else {
+            stop()
+            return
+        }
+        
+        moveTo(item: currentPlan[index + 1])
     }
     
+    func jump<T: SherpaPlan>(to item: T) {
+        guard let currentPlan = currentPlan, let index = currentPlan.firstIndex(of: item.key()) else {
+            return
+        }
+        moveTo(item: currentPlan[index])
+    }
+
     func stop(animated: Bool = true) {
         if animated {
             withAnimation {
@@ -101,6 +91,23 @@ final class SherpaGuide: ObservableObject {
             }
         } else {
             stopImpl()
+        }
+    }
+    
+    private func moveTo(item: String) {
+        self.current = item
+        
+        withAnimation {
+            if state == .active {
+                self.state = .transition
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    withAnimation {
+                        self.state = .active
+                    }
+                }
+            } else {
+                self.state = .active
+            }
         }
     }
     
