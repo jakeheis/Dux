@@ -28,14 +28,14 @@ struct DemoListView: View {
 struct DemoView: View {
     private let spacing: CGFloat = 10
     
-    static var currentDemo: ((Plan) -> CalloutConfig)?
+    static var currentDemo: ((Tags) -> Callout)?
     
-    enum Plan: SherpaPlan {
+    enum Tags: SherpaTags {
         case bar
         case name
         case email
         
-        func config() -> CalloutConfig {
+        func createCallout() -> Callout {
             if let currentDemo = currentDemo {
                 return currentDemo(self)
             } else {
@@ -44,8 +44,8 @@ struct DemoView: View {
         }
     }
     
-    init(demo: @escaping (Plan) -> CalloutConfig) {
-        Self.currentDemo = demo
+    init(demo: @escaping (Tags) -> Callout) {
+        Self.currentDemo = { tags in demo(tags) }
     }
     
     var body: some View {
@@ -55,13 +55,13 @@ struct DemoView: View {
                 .resizable().aspectRatio(contentMode: .fit)
                 .frame(width: 100)
             Text("@jakeheis")
-                .sherpaMark(Plan.name)
+                .sherpaTag(Tags.name)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .overlay(overlay, alignment: .bottom)
         .navigationBarTitleDisplayMode(.inline)
-        .sherpaExternalMark(Plan.bar, edge: .top)
-        .guide(isActive: true, plan: Plan.self)
+        .sherpaExtensionTag(Tags.bar, edge: .top)
+        .guide(isActive: true, tags: Tags.self)
     }
     
     var overlay: some View {
@@ -71,7 +71,7 @@ struct DemoView: View {
                 HStack(spacing: spacing) {
                     GreenText(text: "34 posts", width: proxy.size.width / 4 - spacing * 2 / 3)
                     GreenText(text: "me@me.com", width: proxy.size.width / 2 - spacing * 2 / 3)
-                        .sherpaMark(Plan.email)
+                        .sherpaTag(Tags.email)
                     GreenText(text: "29 karma", width: proxy.size.width / 4 - spacing * 2 / 3)
                 }
             }
@@ -110,9 +110,9 @@ struct DefaultDemo: View {
             .navigationTitle("Default")
     }
     
-    func demo(plan: DemoView.Plan) -> CalloutConfig {
+    func demo(plan: DemoView.Tags) -> Callout {
         switch plan {
-        case .bar: return .okText("You are in the profile section, where you can review all info.", direction: .down)
+        case .bar: return .okText("You are in the profile section, where you can review all info.", edge: .bottom)
         case .name: return .okText("That, here, is your name.")
         case .email: return .okText("That is your email address")
         }
@@ -122,12 +122,12 @@ struct DefaultDemo: View {
 struct HintOnlyDemo: View {
     var body: some View {
         DemoView(demo: demo)
-            .navigationTitle("Default")
+            .navigationTitle("Hint only")
     }
     
-    func demo(plan: DemoView.Plan) -> CalloutConfig {
+    func demo(plan: DemoView.Tags) -> Callout {
         switch plan {
-        case .bar: return .text("You are in the profile section, where you can review all info.", direction: .down)
+        case .bar: return .text("You are in the profile section, where you can review all info.", edge: .bottom)
         case .name: return .text("That, here, is your name.")
         case .email: return .text("That is your email address")
         }
@@ -137,15 +137,15 @@ struct HintOnlyDemo: View {
 struct CustomDemo: View {
     var body: some View {
         DemoView(demo: demo)
-            .navigationTitle("Default")
+            .navigationTitle("Custom")
     }
     
-    func demo(plan: DemoView.Plan) -> CalloutConfig {
+    func demo(plan: DemoView.Tags) -> Callout {
         switch plan {
-        case .bar: return .custom(direction: .down) { onTap in
+        case .bar: return .custom(edge: .bottom) { onTap in
             CustomBubble(text: "You are in the profile section, where you can review all info.", onTap: onTap)
         }
-        case .name: return .custom(direction: .down) { onTap in
+        case .name: return .custom(edge: .bottom) { onTap in
             CustomBubble(text: "That, here, is your name.", onTap: onTap)
         }
         case .email: return .text("That is your email address")

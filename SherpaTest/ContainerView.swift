@@ -68,7 +68,7 @@ struct SherpaOverlay: View {
                 Color(white: 0.8, opacity: 0.4)
                     .edgesIgnoringSafeArea(.all)
                 if let current = guide.current, let details = allRecordedItems[current] {
-                    Callout(config: details.config, onTap: {}).opacity(0)
+                    details.callout.createView(onTap: {}).opacity(0)
                 }
             } else if guide.publisher.state == .active {
                 if let current = guide.current,  let details = allRecordedItems[current] {
@@ -96,13 +96,11 @@ struct ActiveSherpaOverlay: View {
 
             touchModeView(for: proxy[details.anchor], mode: details.touchMode)
 
-            Callout(config: details.config, onTap: {
-                guide.advance()
-            })
-            .offset(
-                x: proxy[details.anchor].midX - popoverSize.width / 2,
-                y: details.config.direction == .up ? proxy[details.anchor].minY - popoverSize.height : proxy[details.anchor].maxY
-            )
+            details.callout.createView(onTap: guide.advance)
+                .offset(
+                    x: proxy[details.anchor].midX - popoverSize.width / 2,
+                    y: details.callout.edge == .top ? proxy[details.anchor].minY - popoverSize.height : proxy[details.anchor].maxY
+                )
         }.edgesIgnoringSafeArea(.all)
     }
     
@@ -160,7 +158,7 @@ struct OverlayFrame: Identifiable {
 
 struct SherpaDetails {
     let anchor: Anchor<CGRect>
-    let config: CalloutConfig
+    let callout: Callout
     let touchMode: CutoutTouchMode
 }
 
@@ -176,32 +174,3 @@ struct SherpaPreferenceKey: PreferenceKey {
         }
     }
 }
-
-//struct SherpaNavigationLink<Destination: View, Label: View>: View {
-//    let destination: Destination
-//    let label: Label
-//    @State private var isActive = false
-//
-//    @EnvironmentObject var sherpa: SherpaGuide
-//
-//    init(destination: Destination, @ViewBuilder label: () -> Label) {
-//        self.destination = destination
-//        self.label = label()
-//    }
-//
-//    var body: some View {
-//        ZStack {
-//            NavigationLink(destination: destination, isActive: $isActive, label: { Text("") })
-//            Button(action: tap) {
-//                label
-//            }
-//        }
-//    }
-//
-//    func tap() {
-//        withAnimation {
-//            sherpa.stop()
-//        }
-//        isActive.toggle()
-//    }
-//}

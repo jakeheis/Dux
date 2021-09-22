@@ -20,16 +20,16 @@ struct ContentView: View {
 }
 
 struct HomeView: View {
-    enum Plan: SherpaPlan {
+    enum Tags: SherpaTags {
         case button
         case detailView
         
-        func config() -> CalloutConfig {
+        func createCallout() -> Callout {
             switch self {
             case .button:
                 return .text("Tap here!")
             case .detailView:
-                return .view(direction: .down) {
+                return .view(edge: .bottom) {
                     HStack {
                         Text("This takes you to a detail view")
                         Image(systemName: "chevron.right")
@@ -48,12 +48,12 @@ struct HomeView: View {
                 .padding()
             NavigationLink(destination: DetailView(), isActive: $detailLinkActive) {
                 Text("Detail view")
-                    .sherpaMark(Plan.detailView, touchMode: .passthrough)
+                    .sherpaTag(Tags.detailView, touchMode: .passthrough)
             }
             Button(action: { sherpa.advance() }) { Text("HEY") }
-                .sherpaMark(Plan.button, touchMode: .passthrough)
+                .sherpaTag(Tags.button, touchMode: .passthrough)
         }
-        .guide(isActive: true, plan: Plan.self)
+        .guide(isActive: true, tags: Tags.self)
         .navigationTitle("Home")
         .navigationBarTitleDisplayMode(.inline)
         .stopSherpa(sherpa, onLink: detailLinkActive)
@@ -63,10 +63,10 @@ struct HomeView: View {
 struct DetailView: View {
     @EnvironmentObject var sherpa: SherpaGuide
     
-    enum Plan: SherpaPlan {
+    enum Tags: SherpaTags {
         case details
         
-        func config() -> CalloutConfig {
+        func createCallout() -> Callout {
             .text("Some details")
         }
     }
@@ -74,8 +74,8 @@ struct DetailView: View {
     var body: some View {
         VStack {
             Text("Details")
-                .sherpaMark(Plan.details)
+                .sherpaTag(Tags.details)
         }
-        .guide(isActive: true, plan: Plan.self)
+        .guide(isActive: true, tags: Tags.self)
     }
 }

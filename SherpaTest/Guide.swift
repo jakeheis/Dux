@@ -8,19 +8,19 @@
 import SwiftUI
 
 extension View {
-    func guide<Plan>(isActive: Bool, plan: Plan.Type) -> some View where Plan: SherpaPlan {
-        GuidableView(isActive: isActive, plan: plan) {
+    func guide<Tags: SherpaTags>(isActive: Bool, tags: Tags.Type) -> some View {
+        GuidableView(isActive: isActive, tags: tags) {
             self
         }
     }
 
-    func sherpaMark<T: SherpaPlan>(_ name: T, touchMode: CutoutTouchMode = .advance) -> some View {
+    func sherpaTag<T: SherpaTags>(_ tag: T, touchMode: CutoutTouchMode = .advance) -> some View {
         anchorPreference(key: SherpaPreferenceKey.self, value: .bounds, transform: { anchor in
-            return [name.key(): SherpaDetails(anchor: anchor, config: name.config(), touchMode: touchMode)]
+            return [tag.key(): SherpaDetails(anchor: anchor, callout: tag.createCallout(), touchMode: touchMode)]
         })
     }
     
-    func sherpaExternalMark<T: SherpaPlan>(_ name: T, edge: Edge, size: CGFloat = 100) -> some View {
+    func sherpaExtensionTag<T: SherpaTags>(_ tag: T, edge: Edge, size: CGFloat = 100) -> some View {
         let width: CGFloat? = (edge == .leading || edge == .trailing) ? size : nil
         let height: CGFloat? = (edge == .top || edge == .bottom) ? size : nil
         
@@ -32,7 +32,7 @@ extension View {
         case .bottom: alignment = .bottom
         }
         
-        return overlay(Color.clear.frame(maxWidth: .infinity, maxHeight: .infinity).frame(width: width, height: height).sherpaMark(name).padding(Edge.Set(edge), -size), alignment: alignment)
+        return overlay(Color.clear.frame(maxWidth: .infinity, maxHeight: .infinity).frame(width: width, height: height).sherpaTag(tag).padding(Edge.Set(edge), -size), alignment: alignment)
     }
     
     func stopSherpa(_ sherpa: SherpaGuide, onLink navigationLink: Bool) -> some View {
@@ -68,8 +68,8 @@ final class SherpaGuide: ObservableObject {
 
     private var currentPlan: [String]?
     
-    func start<Plan: SherpaPlan>(plan: Plan.Type, after interval: TimeInterval = 0.5) {
-        let plan = plan.allCases.map { $0.key() }
+    func start<Tags: SherpaTags>(tags: Tags.Type, after interval: TimeInterval = 0.5) {
+        let plan = tags.allCases.map { $0.key() }
         currentPlan = plan
         if plan.count > 0 {
             current = plan[0]
@@ -97,8 +97,8 @@ final class SherpaGuide: ObservableObject {
         moveTo(item: currentPlan[index + 1])
     }
     
-    func jump<T: SherpaPlan>(to item: T) {
-        guard let currentPlan = currentPlan, let index = currentPlan.firstIndex(of: item.key()) else {
+    func jump<T: SherpaTags>(to tag: T) {
+        guard let currentPlan = currentPlan, let index = currentPlan.firstIndex(of: tag.key()) else {
             return
         }
         moveTo(item: currentPlan[index])
@@ -139,13 +139,13 @@ final class SherpaGuide: ObservableObject {
 }
 
 
-struct GuidableView<Content: View, Plan: SherpaPlan>: View {
+struct GuidableView<Content: View, Tags: SherpaTags>: View {
     let isActive: Bool
     let content: Content
     
     @EnvironmentObject private var sherpa: SherpaGuide
     
-    init(isActive: Bool, plan: Plan.Type, @ViewBuilder content: () -> Content) {
+    init(isActive: Bool, tags: Tags.Type, @ViewBuilder content: () -> Content) {
         self.isActive = isActive
         self.content = content()
     }
@@ -154,17 +154,17 @@ struct GuidableView<Content: View, Plan: SherpaPlan>: View {
         content
             .onAppear {
                 if isActive {
-                    sherpa.start(plan: Plan.self)
+                    sherpa.start(tags: Tags.self)
                 }
             }
     }
 }
 
-protocol SherpaPlan: CaseIterable {
-    func config() -> CalloutConfig
+protocol SherpaTags: CaseIterable {
+    func createCallout() -> Callout
 }
 
-extension SherpaPlan {
+extension SherpaTags {
     func key() -> String {
         String(reflecting: Self.self) + "." + String(describing: self)
     }

@@ -7,37 +7,19 @@
 
 import SwiftUI
 
-struct Callout: View {
-    let config: CalloutConfig
-    let onTap: () -> Void
-    
-    var body: some View {
-        config.body(onTap)
-            .overlay(GeometryReader { proxy in
-                Color.clear
-                    .preference(key: CalloutPreferenceKey.self, value: proxy.size)
-            })
-    }
-}
-
 enum CutoutTouchMode {
     case passthrough
     case advance
     case custom(() -> Void)
 }
 
-struct CalloutConfig {
-    enum Direction {
-        case up
-        case down
+struct Callout {
+    static func text(_ text: String, edge: Edge = .top) -> Self {
+        .view(edge: edge) { Text(text) }
     }
     
-    static func text(_ text: String, direction: Direction = .up) -> Self {
-        .view(direction: direction) { Text(text) }
-    }
-    
-    static func okText(_ text: String, direction: Direction = .up) -> Self {
-        .view(direction: direction) {
+    static func okText(_ text: String, edge: Edge = .top) -> Self {
+        .view(edge: edge) {
             HStack {
                 Text(text)
                     .padding(.trailing, 5)
@@ -48,29 +30,37 @@ struct CalloutConfig {
         }
     }
     
-    static func view<V: View>(direction: Direction = .up, @ViewBuilder content: () -> V) -> Self {
+    static func view<V: View>(edge: Edge = .top, @ViewBuilder content: () -> V) -> Self {
         let inside = content()
         let bodyBlock: (@escaping () -> Void) -> AnyView = { onTap in
             AnyView(Button(action: onTap) {
                 inside.padding(5)
             }
             .padding(.horizontal)
-            .buttonStyle(CalloutButtonStyle(direction: direction)))
+            .buttonStyle(CalloutButtonStyle(edge: edge)))
         }
         
-        return .init(body: bodyBlock, direction: direction)
+        return .init(body: bodyBlock, edge: edge)
     }
     
-    static func custom<V: View>(direction: Direction = .up, @ViewBuilder content: @escaping (_ onTap: @escaping () -> Void) -> V) -> Self {
-        return .init(body: { onTap in AnyView(content(onTap)) }, direction: direction)
+    static func custom<V: View>(edge: Edge = .top, @ViewBuilder content: @escaping (_ onTap: @escaping () -> Void) -> V) -> Self {
+        return .init(body: { onTap in AnyView(content(onTap)) }, edge: edge)
     }
     
     let body: (_ onTap: @escaping () -> Void) -> AnyView
-    let direction: Direction
+    let edge: Edge
+    
+    func createView(onTap: @escaping () -> Void) -> some View {
+        body(onTap)
+            .overlay(GeometryReader { proxy in
+                Color.clear
+                    .preference(key: CalloutPreferenceKey.self, value: proxy.size)
+            })
+    }
 }
 
 struct CalloutBubble: Shape {
-    let direction: CalloutConfig.Direction
+    let edge: Edge
     
     func path(in rect: CGRect) -> Path {
         let pointerWidth: CGFloat = 10
@@ -80,15 +70,15 @@ struct CalloutBubble: Shape {
         
         let points: [CGPoint]
         let frame: CGRect
-        switch direction {
-        case .down:
+        switch edge {
+        case .bottom, .leading, .trailing:
             points = [
                 .init(x: rect.width / 2 - pointerWidth / 2, y: pointerHeight),
                 .init(x: rect.width / 2 + pointerWidth / 2, y: pointerHeight),
                 .init(x: rect.width / 2, y: 0)
             ]
             frame = .init(x: 0, y: pointerHeight, width: rect.width, height: rect.height - pointerHeight)
-        case .up:
+        case .top:
             points = [
                 .init(x: rect.width / 2 - pointerWidth / 2, y: rect.height - pointerHeight),
                 .init(x: rect.width / 2 + pointerWidth / 2, y: rect.height - pointerHeight),
@@ -114,22 +104,22 @@ struct CalloutBubble: Shape {
 //}
 
 struct CalloutButtonStyle: ButtonStyle {
-    let direction: CalloutConfig.Direction
+    let edge: Edge
     
     func makeBody(configuration: Configuration) -> some View {
         VStack(spacing: 0) {
-            if direction == .down {
+            if edge == .bottom {
                 Color.clear.frame(width: 1, height: 10)
             }
             
             configuration.label
                 .padding(6)
             
-            if direction == .up {
+            if edge == .top {
                 Color.clear.frame(width: 1, height: 10)
             }
         }.background(
-            CalloutBubble(direction: direction)
+            CalloutBubble(edge: edge)
                 .fill(configuration.isPressed ? Color(white: 0.8, opacity: 1.0) : Color.white)
                 .shadow(radius: 2)
         )
