@@ -133,7 +133,7 @@ class DuxStatePublisher: ObservableObject {
 }
 
 public protocol DuxTags: CaseIterable {
-    func createCallout() -> Callout
+    func makeCallout() -> Callout
 }
 
 extension DuxTags {
