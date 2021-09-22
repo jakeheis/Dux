@@ -7,31 +7,25 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		EF77462026FA46F0004EB611 /* DemoList.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF77461F26FA46F0004EB611 /* DemoList.swift */; };
-		EF77462226FAA23B004EB611 /* Callout.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF77462126FAA23A004EB611 /* Callout.swift */; };
-		EF77462426FAA340004EB611 /* Guide.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF77462326FAA340004EB611 /* Guide.swift */; };
-		EF77462626FAA381004EB611 /* ContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF77462526FAA381004EB611 /* ContainerView.swift */; };
-		EFF2E75A26F2474600737368 /* DuxTestApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFF2E75926F2474600737368 /* DuxTestApp.swift */; };
-		EFF2E75C26F2474600737368 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFF2E75B26F2474600737368 /* ContentView.swift */; };
-		EFF2E75E26F2474800737368 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EFF2E75D26F2474800737368 /* Assets.xcassets */; };
-		EFF2E76126F2474800737368 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EFF2E76026F2474800737368 /* Preview Assets.xcassets */; };
+		EF84DC6326FB7EA9004A793C /* ExampleApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF84DC6226FB7EA9004A793C /* ExampleApp.swift */; };
+		EF84DC6726FB7EAE004A793C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EF84DC6626FB7EAE004A793C /* Assets.xcassets */; };
+		EF84DC6A26FB7EAE004A793C /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EF84DC6926FB7EAE004A793C /* Preview Assets.xcassets */; };
+		EF84DC7726FB7EEE004A793C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF84DC7526FB7EEE004A793C /* ContentView.swift */; };
+		EF84DC7826FB7EEE004A793C /* DemoList.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF84DC7626FB7EEE004A793C /* DemoList.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		EF77461F26FA46F0004EB611 /* DemoList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoList.swift; sourceTree = "<group>"; };
-		EF77462126FAA23A004EB611 /* Callout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Callout.swift; sourceTree = "<group>"; };
-		EF77462326FAA340004EB611 /* Guide.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Guide.swift; sourceTree = "<group>"; };
-		EF77462526FAA381004EB611 /* ContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContainerView.swift; sourceTree = "<group>"; };
-		EFF2E75626F2474600737368 /* SherpaTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SherpaTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		EFF2E75926F2474600737368 /* DuxTestApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuxTestApp.swift; sourceTree = "<group>"; };
-		EFF2E75B26F2474600737368 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		EFF2E75D26F2474800737368 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		EFF2E76026F2474800737368 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		EFF2E76226F2474800737368 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		EF84DC5F26FB7EA9004A793C /* Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		EF84DC6226FB7EA9004A793C /* ExampleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExampleApp.swift; sourceTree = "<group>"; };
+		EF84DC6626FB7EAE004A793C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		EF84DC6926FB7EAE004A793C /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		EF84DC6B26FB7EAE004A793C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		EF84DC7526FB7EEE004A793C /* ContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		EF84DC7626FB7EEE004A793C /* DemoList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DemoList.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		EFF2E75326F2474600737368 /* Frameworks */ = {
+		EF84DC5C26FB7EA9004A793C /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -41,42 +35,39 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		EFF2E74D26F2474600737368 = {
+		EF84DC5626FB7EA9004A793C = {
 			isa = PBXGroup;
 			children = (
-				EFF2E75826F2474600737368 /* SherpaTest */,
-				EFF2E75726F2474600737368 /* Products */,
+				EF84DC6126FB7EA9004A793C /* Example */,
+				EF84DC6026FB7EA9004A793C /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		EFF2E75726F2474600737368 /* Products */ = {
+		EF84DC6026FB7EA9004A793C /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				EFF2E75626F2474600737368 /* SherpaTest.app */,
+				EF84DC5F26FB7EA9004A793C /* Example.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		EFF2E75826F2474600737368 /* SherpaTest */ = {
+		EF84DC6126FB7EA9004A793C /* Example */ = {
 			isa = PBXGroup;
 			children = (
-				EFF2E75926F2474600737368 /* DuxTestApp.swift */,
-				EFF2E75B26F2474600737368 /* ContentView.swift */,
-				EF77461F26FA46F0004EB611 /* DemoList.swift */,
-				EF77462126FAA23A004EB611 /* Callout.swift */,
-				EF77462326FAA340004EB611 /* Guide.swift */,
-				EF77462526FAA381004EB611 /* ContainerView.swift */,
-				EFF2E75D26F2474800737368 /* Assets.xcassets */,
-				EFF2E76226F2474800737368 /* Info.plist */,
-				EFF2E75F26F2474800737368 /* Preview Content */,
+				EF84DC6226FB7EA9004A793C /* ExampleApp.swift */,
+				EF84DC7526FB7EEE004A793C /* ContentView.swift */,
+				EF84DC7626FB7EEE004A793C /* DemoList.swift */,
+				EF84DC6626FB7EAE004A793C /* Assets.xcassets */,
+				EF84DC6B26FB7EAE004A793C /* Info.plist */,
+				EF84DC6826FB7EAE004A793C /* Preview Content */,
 			);
-			path = SherpaTest;
+			path = Example;
 			sourceTree = "<group>";
 		};
-		EFF2E75F26F2474800737368 /* Preview Content */ = {
+		EF84DC6826FB7EAE004A793C /* Preview Content */ = {
 			isa = PBXGroup;
 			children = (
-				EFF2E76026F2474800737368 /* Preview Assets.xcassets */,
+				EF84DC6926FB7EAE004A793C /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
 			sourceTree = "<group>";
@@ -84,38 +75,38 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		EFF2E75526F2474600737368 /* SherpaTest */ = {
+		EF84DC5E26FB7EA9004A793C /* Example */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = EFF2E76526F2474800737368 /* Build configuration list for PBXNativeTarget "SherpaTest" */;
+			buildConfigurationList = EF84DC6E26FB7EAE004A793C /* Build configuration list for PBXNativeTarget "Example" */;
 			buildPhases = (
-				EFF2E75226F2474600737368 /* Sources */,
-				EFF2E75326F2474600737368 /* Frameworks */,
-				EFF2E75426F2474600737368 /* Resources */,
+				EF84DC5B26FB7EA9004A793C /* Sources */,
+				EF84DC5C26FB7EA9004A793C /* Frameworks */,
+				EF84DC5D26FB7EA9004A793C /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = SherpaTest;
-			productName = SherpaTest;
-			productReference = EFF2E75626F2474600737368 /* SherpaTest.app */;
+			name = Example;
+			productName = Example;
+			productReference = EF84DC5F26FB7EA9004A793C /* Example.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		EFF2E74E26F2474600737368 /* Project object */ = {
+		EF84DC5726FB7EA9004A793C /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 1250;
 				LastUpgradeCheck = 1250;
 				TargetAttributes = {
-					EFF2E75526F2474600737368 = {
+					EF84DC5E26FB7EA9004A793C = {
 						CreatedOnToolsVersion = 12.5.1;
 					};
 				};
 			};
-			buildConfigurationList = EFF2E75126F2474600737368 /* Build configuration list for PBXProject "SherpaTest" */;
+			buildConfigurationList = EF84DC5A26FB7EA9004A793C /* Build configuration list for PBXProject "Example" */;
 			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -123,46 +114,43 @@
 				en,
 				Base,
 			);
-			mainGroup = EFF2E74D26F2474600737368;
-			productRefGroup = EFF2E75726F2474600737368 /* Products */;
+			mainGroup = EF84DC5626FB7EA9004A793C;
+			productRefGroup = EF84DC6026FB7EA9004A793C /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				EFF2E75526F2474600737368 /* SherpaTest */,
+				EF84DC5E26FB7EA9004A793C /* Example */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		EFF2E75426F2474600737368 /* Resources */ = {
+		EF84DC5D26FB7EA9004A793C /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				EFF2E76126F2474800737368 /* Preview Assets.xcassets in Resources */,
-				EFF2E75E26F2474800737368 /* Assets.xcassets in Resources */,
+				EF84DC6A26FB7EAE004A793C /* Preview Assets.xcassets in Resources */,
+				EF84DC6726FB7EAE004A793C /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		EFF2E75226F2474600737368 /* Sources */ = {
+		EF84DC5B26FB7EA9004A793C /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				EF77462226FAA23B004EB611 /* Callout.swift in Sources */,
-				EFF2E75C26F2474600737368 /* ContentView.swift in Sources */,
-				EF77462626FAA381004EB611 /* ContainerView.swift in Sources */,
-				EF77462426FAA340004EB611 /* Guide.swift in Sources */,
-				EF77462026FA46F0004EB611 /* DemoList.swift in Sources */,
-				EFF2E75A26F2474600737368 /* DuxTestApp.swift in Sources */,
+				EF84DC7726FB7EEE004A793C /* ContentView.swift in Sources */,
+				EF84DC7826FB7EEE004A793C /* DemoList.swift in Sources */,
+				EF84DC6326FB7EA9004A793C /* ExampleApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		EFF2E76326F2474800737368 /* Debug */ = {
+		EF84DC6C26FB7EAE004A793C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -223,7 +211,7 @@
 			};
 			name = Debug;
 		};
-		EFF2E76426F2474800737368 /* Release */ = {
+		EF84DC6D26FB7EAE004A793C /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -278,46 +266,44 @@
 			};
 			name = Release;
 		};
-		EFF2E76626F2474800737368 /* Debug */ = {
+		EF84DC6F26FB7EAE004A793C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_ASSET_PATHS = "\"SherpaTest/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"Example/Preview Content\"";
 				DEVELOPMENT_TEAM = CKS5EY95X9;
 				ENABLE_PREVIEWS = YES;
-				INFOPLIST_FILE = SherpaTest/Info.plist;
+				INFOPLIST_FILE = Example/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				OTHER_SWIFT_FLAGS = "-Xfrontend -warn-long-expression-type-checking=200";
-				PRODUCT_BUNDLE_IDENTIFIER = com.jakeheis.DuxTest;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jakeheis.Example;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
-		EFF2E76726F2474800737368 /* Release */ = {
+		EF84DC7026FB7EAE004A793C /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_ASSET_PATHS = "\"SherpaTest/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"Example/Preview Content\"";
 				DEVELOPMENT_TEAM = CKS5EY95X9;
 				ENABLE_PREVIEWS = YES;
-				INFOPLIST_FILE = SherpaTest/Info.plist;
+				INFOPLIST_FILE = Example/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				OTHER_SWIFT_FLAGS = "-Xfrontend -warn-long-expression-type-checking=200";
-				PRODUCT_BUNDLE_IDENTIFIER = com.jakeheis.DuxTest;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jakeheis.Example;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -327,25 +313,25 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		EFF2E75126F2474600737368 /* Build configuration list for PBXProject "SherpaTest" */ = {
+		EF84DC5A26FB7EA9004A793C /* Build configuration list for PBXProject "Example" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				EFF2E76326F2474800737368 /* Debug */,
-				EFF2E76426F2474800737368 /* Release */,
+				EF84DC6C26FB7EAE004A793C /* Debug */,
+				EF84DC6D26FB7EAE004A793C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		EFF2E76526F2474800737368 /* Build configuration list for PBXNativeTarget "SherpaTest" */ = {
+		EF84DC6E26FB7EAE004A793C /* Build configuration list for PBXNativeTarget "Example" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				EFF2E76626F2474800737368 /* Debug */,
-				EFF2E76726F2474800737368 /* Release */,
+				EF84DC6F26FB7EAE004A793C /* Debug */,
+				EF84DC7026FB7EAE004A793C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = EFF2E74E26F2474600737368 /* Project object */;
+	rootObject = EF84DC5726FB7EA9004A793C /* Project object */;
 }
