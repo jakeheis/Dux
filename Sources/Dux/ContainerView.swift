@@ -10,6 +10,8 @@ import SwiftUI
 public struct SkipButton: View {
     @EnvironmentObject var dux: Dux
     
+    public init() {}
+    
     public var body: some View {
         Button(action: quit) {
             Text("Skip")
@@ -20,7 +22,7 @@ public struct SkipButton: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
     }
     
-    func quit() {
+    private func quit() {
         withAnimation {
             dux.stop()
         }

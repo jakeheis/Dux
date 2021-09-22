@@ -1,61 +1,11 @@
 //
-//  Guide.swift
+//  Dux.swift
 //  Dux
 //
 //  Created by Jake Heiser on 9/21/21.
 //
 
 import SwiftUI
-
-extension View {
-    public func guide<Tags: DuxTags>(isActive: Bool, tags: Tags.Type) -> some View {
-        GuidableView(isActive: isActive, tags: tags) {
-            self
-        }
-    }
-
-    public func duxTag<T: DuxTags>(_ tag: T, touchMode: CutoutTouchMode = .advance) -> some View {
-        anchorPreference(key: DuxTagPreferenceKey.self, value: .bounds, transform: { anchor in
-            return [tag.key(): DuxTagInfo(anchor: anchor, callout: tag.createCallout(), touchMode: touchMode)]
-        })
-    }
-    
-    public func duxExtensionTag<T: DuxTags>(_ tag: T, touchMode: CutoutTouchMode = .advance, edge: Edge, size: CGFloat = 100) -> some View {
-        let width: CGFloat? = (edge == .leading || edge == .trailing) ? size : nil
-        let height: CGFloat? = (edge == .top || edge == .bottom) ? size : nil
-        
-        let alignment: Alignment
-        switch edge {
-        case .top: alignment = .top
-        case .leading: alignment = .leading
-        case .trailing: alignment = .trailing
-        case .bottom: alignment = .bottom
-        }
-        
-        let overlayView = Color.clear
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .frame(width: width, height: height)
-            .duxTag(tag, touchMode: touchMode)
-            .padding(Edge.Set(edge), -size)
-        return overlay(overlayView, alignment: alignment)
-    }
-    
-    public func stopDux(_ dux: Dux, onLink navigationLink: Bool) -> some View {
-        onChange(of: navigationLink, perform: { shown in
-            if shown {
-                dux.stop()
-            }
-        })
-    }
-    
-    public func stopDux<V: Hashable>(_ dux: Dux, onTag navigationTag: V, selection: V) -> some View {
-        onChange(of: selection, perform: { value in
-            if navigationTag == value {
-                dux.stop()
-            }
-        })
-    }
-}
 
 class DuxStatePublisher: ObservableObject {
     enum State {
@@ -73,7 +23,7 @@ public final class Dux: ObservableObject {
 
     private var currentPlan: [String]?
     
-    func start<Tags: DuxTags>(tags: Tags.Type) {
+    public func start<Tags: DuxTags>(tags: Tags.Type) {
         let plan = tags.allCases.map { $0.key() }
         currentPlan = plan
         
@@ -83,7 +33,7 @@ public final class Dux: ObservableObject {
         }
     }
     
-    func advance() {
+    public func advance() {
         guard let current = current, let currentPlan = currentPlan else {
             return
         }
@@ -99,14 +49,14 @@ public final class Dux: ObservableObject {
         moveTo(item: currentPlan[index + 1])
     }
     
-    func jump<T: DuxTags>(to tag: T) {
+    public func jump<T: DuxTags>(to tag: T) {
         guard let currentPlan = currentPlan, let index = currentPlan.firstIndex(of: tag.key()) else {
             return
         }
         moveTo(item: currentPlan[index])
     }
 
-    func stop(animated: Bool = true) {
+    public func stop(animated: Bool = true) {
         if animated {
             withAnimation {
                 stopImpl()
