@@ -14,4 +14,4 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build
-      run: xcodebuild -scheme Dux -destination 'platform=iOS Simulator,OS=14.5,name=iPhone 12'
+      run: xcodebuild -scheme Dux -destination 'platform=iOS Simulator,OS=14.4,name=iPhone 12' || xcodebuild -scheme Dux -destination 'platform=iOS Simulator,OS=14.5,name=iPhone 12'
