@@ -67,17 +67,20 @@ public final class Dux: ObservableObject {
     }
     
     private func moveTo(item: String) {
-        self.current = item
-        
         withAnimation {
             if statePublisher.state == .active {
                 statePublisher.state = .transition
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    withAnimation {
-                        self.statePublisher.state = .active
+                    self.current = item
+                    self.statePublisher.state = .transition
+                    DispatchQueue.main.async {
+                        withAnimation {
+                            self.statePublisher.state = .active
+                        }
                     }
                 }
             } else {
+                current = item
                 statePublisher.state = .active
             }
         }
