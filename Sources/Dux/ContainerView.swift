@@ -60,7 +60,7 @@ struct DuxOverlay: View {
     var body: some View {
         ZStack {
             if duxState.state == .transition {
-                Color(white: 0.8, opacity: 0.4)
+                dux.delegate.overlay(dux: dux)
                     .edgesIgnoringSafeArea(.all)
                 if let current = dux.current, let details = allRecordedItems[current] {
                     details.callout.createView(onTap: {}).opacity(0)
@@ -141,7 +141,7 @@ struct ActiveDuxOverlay: View {
     
     var body: some View {
         GeometryReader { proxy in
-            CutoutOverlay(cutoutFrame: proxy[tagInfo.anchor], screenSize: proxy.size)
+            CutoutOverlay(dux: dux, cutoutFrame: proxy[tagInfo.anchor], screenSize: proxy.size)
                 .onTapGesture {
                     dux.delegate.onBackgroundTap(dux: dux)
                 }
@@ -179,6 +179,7 @@ struct ActiveDuxOverlay: View {
 }
 
 struct CutoutOverlay: View {
+    let dux: Dux
     let cutoutFrame: CGRect
     let screenSize: CGSize
     
@@ -193,7 +194,7 @@ struct CutoutOverlay: View {
     
     var body: some View {
         ForEach(overlayFrames) { frame in
-            Color(white: 0.8, opacity: 0.4)
+            dux.delegate.overlay(dux: dux)
                 .frame(width: frame.rect.width, height: frame.rect.height)
                 .offset(x: frame.rect.minX, y: frame.rect.minY)
         }

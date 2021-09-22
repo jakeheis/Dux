@@ -9,6 +9,7 @@ import SwiftUI
 
 public protocol DuxDelegate {
     func accessoryView(dux: Dux) -> AnyView?
+    func overlay(dux: Dux) -> AnyView?
     func cutoutTouchMode(dux: Dux) -> CutoutTouchMode
     func onBackgroundTap(dux: Dux)
     func onCalloutTap(dux: Dux)
@@ -17,6 +18,10 @@ public protocol DuxDelegate {
 extension DuxDelegate {
     func accessoryView(dux: Dux) -> AnyView? {
         AnyView(SkipButton())
+    }
+    
+    func overlay(dux: Dux) -> AnyView? {
+        AnyView(Color(white: 0.8, opacity: 0.5))
     }
     
     func cutoutTouchMode(dux: Dux) -> CutoutTouchMode {
