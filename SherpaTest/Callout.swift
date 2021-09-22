@@ -36,12 +36,25 @@ struct CalloutConfig {
         .view(direction: direction) { Text(text) }
     }
     
+    static func okText(_ text: String, direction: Direction = .up) -> Self {
+        .view(direction: direction) {
+            HStack {
+                Text(text)
+                    .padding(.trailing, 5)
+                Color.black.frame(width: 1)
+                Text("Ok!")
+                    .padding(.leading, 5)
+            }.fixedSize(horizontal: false, vertical: true)
+        }
+    }
+    
     static func view<V: View>(direction: Direction = .up, @ViewBuilder content: () -> V) -> Self {
         let inside = content()
         let bodyBlock: (@escaping () -> Void) -> AnyView = { onTap in
             AnyView(Button(action: onTap) {
-                inside
+                inside.padding(5)
             }
+            .padding(.horizontal)
             .buttonStyle(CalloutButtonStyle(direction: direction)))
         }
         

@@ -15,6 +15,9 @@ struct DemoListView: View {
                     NavigationLink(destination: DefaultDemo()) {
                         Text("Default")
                     }
+                    NavigationLink(destination: HintOnlyDemo()) {
+                        Text("Hint only")
+                    }
                 }
             }.tabItem { Text("SUP") }
         }
@@ -102,11 +105,26 @@ struct DemoViewPreview: PreviewProvider {
 
 struct DefaultDemo: View {
     var body: some View {
-        DemoView(demo: defaultDemo)
+        DemoView(demo: demo)
             .navigationTitle("Default")
     }
     
-    func defaultDemo(plan: DemoView.Plan) -> CalloutConfig {
+    func demo(plan: DemoView.Plan) -> CalloutConfig {
+        switch plan {
+        case .bar: return .okText("You are in the profile section, where you can review all info.", direction: .down)
+        case .name: return .okText("That, here, is your name.")
+        case .email: return .okText("That is your email address")
+        }
+    }
+}
+
+struct HintOnlyDemo: View {
+    var body: some View {
+        DemoView(demo: demo)
+            .navigationTitle("Default")
+    }
+    
+    func demo(plan: DemoView.Plan) -> CalloutConfig {
         switch plan {
         case .bar: return .text("You are in the profile section, where you can review all info.", direction: .down)
         case .name: return .text("That, here, is your name.")
@@ -114,3 +132,5 @@ struct DefaultDemo: View {
         }
     }
 }
+
+//struct

@@ -168,9 +168,9 @@ struct SherpaPreferenceKey: PreferenceKey {
 //    let destination: Destination
 //    let label: Label
 //    @State private var isActive = false
-//    
+//
 //    @EnvironmentObject var sherpa: SherpaGuide
-//    
+//
 //    init(destination: Destination, @ViewBuilder label: () -> Label) {
 //        self.destination = destination
 //        self.label = label()
@@ -184,7 +184,7 @@ struct SherpaPreferenceKey: PreferenceKey {
 //            }
 //        }
 //    }
-//    
+//
 //    func tap() {
 //        withAnimation {
 //            sherpa.stop()
