@@ -71,7 +71,7 @@ struct CalloutBubble: Shape {
         let points: [CGPoint]
         let frame: CGRect
         switch edge {
-        case .bottom, .leading, .trailing:
+        case .bottom:
             points = [
                 .init(x: rect.width / 2 - pointerWidth / 2, y: pointerHeight),
                 .init(x: rect.width / 2 + pointerWidth / 2, y: pointerHeight),
@@ -85,6 +85,20 @@ struct CalloutBubble: Shape {
                 .init(x: rect.width / 2, y: rect.height)
             ]
             frame = .init(x: 0, y: 0, width: rect.width, height: rect.height - pointerHeight)
+        case .leading:
+            points = [
+                .init(x: rect.width - pointerHeight, y: rect.height / 2 - pointerWidth / 2),
+                .init(x: rect.width - pointerHeight, y: rect.height / 2 + pointerWidth / 2),
+                .init(x: rect.width, y: rect.height / 2)
+            ]
+            frame = .init(x: 0, y: 0, width: rect.width - pointerHeight, height: rect.height)
+        case .trailing:
+            points = [
+                .init(x: pointerHeight, y: rect.height / 2 - pointerWidth / 2),
+                .init(x: pointerHeight, y: rect.height / 2 + pointerWidth / 2),
+                .init(x: 0, y: rect.height / 2)
+            ]
+            frame = .init(x: pointerHeight, y: 0, width: rect.width - pointerHeight, height: rect.height)
         }
         
         path.move(to: points.last!)
@@ -94,14 +108,16 @@ struct CalloutBubble: Shape {
     }
 }
 
-//struct CalloutBubblePreview: PreviewProvider {
-//    static var previews: some View {
-//        VStack {
-//            CalloutBubble(direction: .down).fill(Color.green).shadow(radius: 1).frame(width: 100, height: 50)
-//            CalloutBubble(direction: .up).fill(Color.green).shadow(radius: 1).frame(width: 100, height: 50)
-//        }
-//    }
-//}
+struct CalloutBubblePreview: PreviewProvider {
+    static var previews: some View {
+        VStack {
+            CalloutBubble(edge: .bottom).fill(Color.green).shadow(radius: 1).frame(width: 100, height: 50)
+            CalloutBubble(edge: .top).fill(Color.green).shadow(radius: 1).frame(width: 100, height: 50)
+            CalloutBubble(edge: .leading).fill(Color.green).shadow(radius: 1).frame(width: 100, height: 50)
+            CalloutBubble(edge: .trailing).fill(Color.green).shadow(radius: 1).frame(width: 100, height: 50)
+        }
+    }
+}
 
 struct CalloutButtonStyle: ButtonStyle {
     let edge: Edge
@@ -112,8 +128,16 @@ struct CalloutButtonStyle: ButtonStyle {
                 Color.clear.frame(width: 1, height: 10)
             }
             
-            configuration.label
-                .padding(6)
+            HStack {
+                if edge == .trailing {
+                    Color.clear.frame(width: 10, height: 1)
+                }
+                configuration.label
+                    .padding(6)
+                if edge == .leading {
+                    Color.clear.frame(width: 10, height: 1)
+                }
+            }
             
             if edge == .top {
                 Color.clear.frame(width: 1, height: 10)

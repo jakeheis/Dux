@@ -148,7 +148,7 @@ struct CustomDemo: View {
         case .name: return .custom(edge: .bottom) { onTap in
             CustomBubble(text: "That, here, is your name.", onTap: onTap)
         }
-        case .email: return .text("That is your email address")
+        case .email: return .text("Email!", edge: .trailing)
         }
     }
     

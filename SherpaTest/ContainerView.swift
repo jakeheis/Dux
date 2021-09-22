@@ -87,6 +87,28 @@ struct ActiveSherpaOverlay: View {
     let guide: SherpaGuide
     let popoverSize: CGSize
     
+    func offsetX(cutout: CGRect) -> CGFloat {
+        switch details.callout.edge {
+        case .top, .bottom:
+            return cutout.midX - popoverSize.width / 2
+        case .leading:
+            return cutout.minX - popoverSize.width
+        case .trailing:
+            return cutout.maxX
+        }
+    }
+    
+    func offsetY(cutout: CGRect) -> CGFloat {
+        switch details.callout.edge {
+        case .leading, .trailing:
+            return cutout.midY - popoverSize.height / 2
+        case .top:
+            return cutout.minY - popoverSize.height
+        case .bottom:
+            return cutout.maxY
+        }
+    }
+    
     var body: some View {
         GeometryReader { proxy in
             CutoutOverlay(cutoutFrame: proxy[details.anchor], screenSize: proxy.size)
@@ -98,8 +120,8 @@ struct ActiveSherpaOverlay: View {
 
             details.callout.createView(onTap: guide.advance)
                 .offset(
-                    x: proxy[details.anchor].midX - popoverSize.width / 2,
-                    y: details.callout.edge == .top ? proxy[details.anchor].minY - popoverSize.height : proxy[details.anchor].maxY
+                    x: offsetX(cutout: proxy[details.anchor]),
+                    y: offsetY(cutout: proxy[details.anchor])
                 )
         }.edgesIgnoringSafeArea(.all)
     }
