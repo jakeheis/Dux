@@ -1,6 +1,6 @@
 # Dux
 
-[![Build Status](https://github.com/jakeheis/Dux/workflows/Swift/badge.svg)](https://github.com/jakeheis/SwiftCLI/actions)
+[![Build Status](https://github.com/jakeheis/Dux/workflows/Build/badge.svg)](https://github.com/jakeheis/SwiftCLI/actions)
 
 Guide users through your SwiftUI app with coach marks.
 
