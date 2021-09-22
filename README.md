@@ -6,6 +6,10 @@ Guide users through your SwiftUI app with coach marks.
 
 <img src=".github/Screenshot.png" width="240">
 
+## Pre-release note
+
+`Dux` has not hit `1.0.0` yet and is undergoing active development which means APIs are unstable and may change.
+
 ## Installation
 
 In `Package.swift`:
