@@ -11,24 +11,18 @@ public struct DuxContainerView<Content: View>: View {
     @StateObject private var dux = Dux()
     
     let content: Content
-    let accessory: AnyView
     
     @State private var popoverSize: CGSize = .zero
     
-    public init<Accessory: View>(accessory: Accessory, @ViewBuilder content: () -> Content) {
-        self.accessory = AnyView(accessory)
-        self.content = content()
-    }
-    
     public init(@ViewBuilder content: () -> Content) {
-        self.init(accessory: EmptyView(), content: content)
+        self.content = content()
     }
     
     public var body: some View {
         content
             .environmentObject(dux)
             .overlayPreferenceValue(DuxTagPreferenceKey.self, { all in
-                DuxOverlay(dux: dux, accessory: accessory, allRecordedItems: all, popoverSize: popoverSize, duxState: dux.statePublisher)
+                DuxOverlay(dux: dux, allRecordedItems: all, popoverSize: popoverSize, duxState: dux.statePublisher)
             })
             .onPreferenceChange(CalloutPreferenceKey.self, perform: { popoverSize = $0 })
     }
@@ -58,7 +52,6 @@ public struct SkipButton: View {
 
 struct DuxOverlay: View {
     let dux: Dux
-    let accessory: AnyView
     let allRecordedItems: DuxTagPreferenceKey.Value
     let popoverSize: CGSize
 
@@ -78,7 +71,7 @@ struct DuxOverlay: View {
                 }
             }
             if duxState.state != .hidden {
-                accessory.environmentObject(dux)
+                dux.delegate.accessoryView(dux: dux).environmentObject(dux)
             }
         }
     }
