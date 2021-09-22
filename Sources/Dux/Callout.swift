@@ -15,11 +15,11 @@ public enum CutoutTouchMode {
 
 public struct Callout {
     public static func text(_ text: String, edge: Edge = .top) -> Self {
-        .view(edge: edge) { Text(text) }
+        .bubble(edge: edge) { Text(text) }
     }
     
     public static func okText(_ text: String, edge: Edge = .top) -> Self {
-        .view(edge: edge) {
+        .bubble(edge: edge) {
             HStack {
                 Text(text)
                     .padding(.trailing, 5)
@@ -30,7 +30,7 @@ public struct Callout {
         }
     }
     
-    public static func view<V: View>(edge: Edge = .top, @ViewBuilder content: () -> V) -> Self {
+    public static func bubble<V: View>(edge: Edge = .top, @ViewBuilder content: () -> V) -> Self {
         let inside = content()
         let bodyBlock: (@escaping () -> Void) -> AnyView = { onTap in
             AnyView(Button(action: onTap) {
