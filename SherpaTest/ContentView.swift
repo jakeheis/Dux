@@ -1,6 +1,6 @@
 //
 //  ContentView.swift
-//  SherpaTest
+//  DuxTest
 //
 //  Created by Jake Heiser on 9/15/21.
 //
@@ -20,7 +20,7 @@ struct ContentView: View {
 }
 
 struct HomeView: View {
-    enum Tags: SherpaTags {
+    enum Tags: DuxTags {
         case button
         case detailView
         
@@ -39,7 +39,7 @@ struct HomeView: View {
         }
     }
     
-    @EnvironmentObject var sherpa: SherpaGuide
+    @EnvironmentObject var dux: Dux
     @State var detailLinkActive = false
     
     var body: some View {
@@ -48,22 +48,20 @@ struct HomeView: View {
                 .padding()
             NavigationLink(destination: DetailView(), isActive: $detailLinkActive) {
                 Text("Detail view")
-                    .sherpaTag(Tags.detailView, touchMode: .passthrough)
+                    .duxTag(Tags.detailView, touchMode: .passthrough)
             }
-            Button(action: { sherpa.advance() }) { Text("HEY") }
-                .sherpaTag(Tags.button, touchMode: .passthrough)
+            Button(action: { dux.advance() }) { Text("HEY") }
+                .duxTag(Tags.button, touchMode: .passthrough)
         }
         .guide(isActive: true, tags: Tags.self)
         .navigationTitle("Home")
         .navigationBarTitleDisplayMode(.inline)
-        .stopSherpa(sherpa, onLink: detailLinkActive)
+        .stopDux(dux, onLink: detailLinkActive)
     }
 }
 
 struct DetailView: View {
-    @EnvironmentObject var sherpa: SherpaGuide
-    
-    enum Tags: SherpaTags {
+    enum Tags: DuxTags {
         case details
         
         func createCallout() -> Callout {
@@ -74,7 +72,7 @@ struct DetailView: View {
     var body: some View {
         VStack {
             Text("Details")
-                .sherpaTag(Tags.details)
+                .duxTag(Tags.details)
         }
         .guide(isActive: true, tags: Tags.self)
     }

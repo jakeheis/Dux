@@ -11,7 +11,7 @@
 		EF77462226FAA23B004EB611 /* Callout.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF77462126FAA23A004EB611 /* Callout.swift */; };
 		EF77462426FAA340004EB611 /* Guide.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF77462326FAA340004EB611 /* Guide.swift */; };
 		EF77462626FAA381004EB611 /* ContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EF77462526FAA381004EB611 /* ContainerView.swift */; };
-		EFF2E75A26F2474600737368 /* SherpaTestApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFF2E75926F2474600737368 /* SherpaTestApp.swift */; };
+		EFF2E75A26F2474600737368 /* DuxTestApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFF2E75926F2474600737368 /* DuxTestApp.swift */; };
 		EFF2E75C26F2474600737368 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFF2E75B26F2474600737368 /* ContentView.swift */; };
 		EFF2E75E26F2474800737368 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EFF2E75D26F2474800737368 /* Assets.xcassets */; };
 		EFF2E76126F2474800737368 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EFF2E76026F2474800737368 /* Preview Assets.xcassets */; };
@@ -23,7 +23,7 @@
 		EF77462326FAA340004EB611 /* Guide.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Guide.swift; sourceTree = "<group>"; };
 		EF77462526FAA381004EB611 /* ContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContainerView.swift; sourceTree = "<group>"; };
 		EFF2E75626F2474600737368 /* SherpaTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SherpaTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		EFF2E75926F2474600737368 /* SherpaTestApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SherpaTestApp.swift; sourceTree = "<group>"; };
+		EFF2E75926F2474600737368 /* DuxTestApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuxTestApp.swift; sourceTree = "<group>"; };
 		EFF2E75B26F2474600737368 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		EFF2E75D26F2474800737368 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		EFF2E76026F2474800737368 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
@@ -60,7 +60,7 @@
 		EFF2E75826F2474600737368 /* SherpaTest */ = {
 			isa = PBXGroup;
 			children = (
-				EFF2E75926F2474600737368 /* SherpaTestApp.swift */,
+				EFF2E75926F2474600737368 /* DuxTestApp.swift */,
 				EFF2E75B26F2474600737368 /* ContentView.swift */,
 				EF77461F26FA46F0004EB611 /* DemoList.swift */,
 				EF77462126FAA23A004EB611 /* Callout.swift */,
@@ -155,7 +155,7 @@
 				EF77462626FAA381004EB611 /* ContainerView.swift in Sources */,
 				EF77462426FAA340004EB611 /* Guide.swift in Sources */,
 				EF77462026FA46F0004EB611 /* DemoList.swift in Sources */,
-				EFF2E75A26F2474600737368 /* SherpaTestApp.swift in Sources */,
+				EFF2E75A26F2474600737368 /* DuxTestApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -294,7 +294,7 @@
 					"@executable_path/Frameworks",
 				);
 				OTHER_SWIFT_FLAGS = "-Xfrontend -warn-long-expression-type-checking=200";
-				PRODUCT_BUNDLE_IDENTIFIER = com.jakeheis.SherpaTest;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jakeheis.DuxTest;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -317,7 +317,7 @@
 					"@executable_path/Frameworks",
 				);
 				OTHER_SWIFT_FLAGS = "-Xfrontend -warn-long-expression-type-checking=200";
-				PRODUCT_BUNDLE_IDENTIFIER = com.jakeheis.SherpaTest;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jakeheis.DuxTest;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

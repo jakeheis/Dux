@@ -1,6 +1,6 @@
 //
 //  DemoList.swift
-//  SherpaTest
+//  DuxTest
 //
 //  Created by Jake Heiser on 9/21/21.
 //
@@ -30,7 +30,7 @@ struct DemoView: View {
     
     static var currentDemo: ((Tags) -> Callout)?
     
-    enum Tags: SherpaTags {
+    enum Tags: DuxTags {
         case bar
         case name
         case email
@@ -55,12 +55,12 @@ struct DemoView: View {
                 .resizable().aspectRatio(contentMode: .fit)
                 .frame(width: 100)
             Text("@jakeheis")
-                .sherpaTag(Tags.name)
+                .duxTag(Tags.name)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .overlay(overlay, alignment: .bottom)
         .navigationBarTitleDisplayMode(.inline)
-        .sherpaExtensionTag(Tags.bar, touchMode: .passthrough, edge: .top)
+        .duxExtensionTag(Tags.bar, touchMode: .passthrough, edge: .top)
         .guide(isActive: true, tags: Tags.self)
     }
     
@@ -71,7 +71,7 @@ struct DemoView: View {
                 HStack(spacing: spacing) {
                     GreenText(text: "34 posts", width: proxy.size.width / 4 - spacing * 2 / 3)
                     GreenText(text: "me@me.com", width: proxy.size.width / 2 - spacing * 2 / 3)
-                        .sherpaTag(Tags.email)
+                        .duxTag(Tags.email)
                     GreenText(text: "29 karma", width: proxy.size.width / 4 - spacing * 2 / 3)
                 }
             }
@@ -96,7 +96,7 @@ struct GreenText: View {
 
 struct DemoViewPreview: PreviewProvider {
     static var previews: some View {
-        SherpaContainerView {
+        DuxContainerView {
             NavigationView {
                 CustomDemo()
             }

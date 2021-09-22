@@ -1,6 +1,6 @@
 //
-//  SherpaTestApp.swift
-//  SherpaTest
+//  DuxTestApp.swift
+//  DuxTest
 //
 //  Created by Jake Heiser on 9/15/21.
 //
@@ -8,10 +8,10 @@
 import SwiftUI
 
 @main
-struct SherpaTestApp: App {
+struct DuxTestApp: App {
     var body: some Scene {
         WindowGroup {
-            SherpaContainerView(accessory: SkipButton()) {
+            DuxContainerView(accessory: SkipButton()) {
                 ContentView()
             }
         }

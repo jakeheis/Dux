@@ -1,6 +1,6 @@
 //
 //  ContainerView.swift
-//  SherpaTest
+//  Dux
 //
 //  Created by Jake Heiser on 9/21/21.
 //
@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct SkipButton: View {
-    @EnvironmentObject var sherpa: SherpaGuide
+    @EnvironmentObject var dux: Dux
     
     var body: some View {
         Button(action: quit) {
@@ -22,13 +22,13 @@ struct SkipButton: View {
     
     func quit() {
         withAnimation {
-            sherpa.stop()
+            dux.stop()
         }
     }
 }
 
-struct SherpaContainerView<Content: View>: View {
-    @StateObject private var guide = SherpaGuide()
+struct DuxContainerView<Content: View>: View {
+    @StateObject private var guide = Dux()
     
     let content: Content
     let accessory: AnyView
@@ -47,48 +47,48 @@ struct SherpaContainerView<Content: View>: View {
     var body: some View {
         content
             .environmentObject(guide)
-            .overlayPreferenceValue(SherpaPreferenceKey.self, { all in
-                SherpaOverlay(guide: guide, accessory: accessory, allRecordedItems: all, popoverSize: popoverSize, sherpaPublisher: guide.publisher)
+            .overlayPreferenceValue(DuxTagPreferenceKey.self, { all in
+                DuxOverlay(guide: guide, accessory: accessory, allRecordedItems: all, popoverSize: popoverSize, duxState: guide.statePublisher)
             })
             .onPreferenceChange(CalloutPreferenceKey.self, perform: { popoverSize = $0 })
     }
 }
 
-struct SherpaOverlay: View {
-    let guide: SherpaGuide
+struct DuxOverlay: View {
+    let guide: Dux
     let accessory: AnyView
-    let allRecordedItems: SherpaPreferenceKey.Value
+    let allRecordedItems: DuxTagPreferenceKey.Value
     let popoverSize: CGSize
 
-    @ObservedObject var sherpaPublisher: SherpaPublisher
+    @ObservedObject var duxState: DuxStatePublisher
     
     var body: some View {
         ZStack {
-            if guide.publisher.state == .transition {
+            if duxState.state == .transition {
                 Color(white: 0.8, opacity: 0.4)
                     .edgesIgnoringSafeArea(.all)
                 if let current = guide.current, let details = allRecordedItems[current] {
                     details.callout.createView(onTap: {}).opacity(0)
                 }
-            } else if guide.publisher.state == .active {
-                if let current = guide.current,  let details = allRecordedItems[current] {
-                    ActiveSherpaOverlay(details: details, guide: guide, popoverSize: popoverSize)
+            } else if duxState.state == .active {
+                if let current = guide.current,  let tagInfo = allRecordedItems[current] {
+                    ActiveDuxOverlay(tagInfo: tagInfo, guide: guide, popoverSize: popoverSize)
                 }
             }
-            if guide.publisher.state != .hidden {
+            if duxState.state != .hidden {
                 accessory.environmentObject(guide)
             }
         }
     }
 }
 
-struct ActiveSherpaOverlay: View {
-    let details: SherpaDetails
-    let guide: SherpaGuide
+struct ActiveDuxOverlay: View {
+    let tagInfo: DuxTagInfo
+    let guide: Dux
     let popoverSize: CGSize
     
     func offsetX(cutout: CGRect) -> CGFloat {
-        switch details.callout.edge {
+        switch tagInfo.callout.edge {
         case .top, .bottom:
             return cutout.midX - popoverSize.width / 2
         case .leading:
@@ -99,7 +99,7 @@ struct ActiveSherpaOverlay: View {
     }
     
     func offsetY(cutout: CGRect) -> CGFloat {
-        switch details.callout.edge {
+        switch tagInfo.callout.edge {
         case .leading, .trailing:
             return cutout.midY - popoverSize.height / 2
         case .top:
@@ -111,17 +111,17 @@ struct ActiveSherpaOverlay: View {
     
     var body: some View {
         GeometryReader { proxy in
-            CutoutOverlay(cutoutFrame: proxy[details.anchor], screenSize: proxy.size)
+            CutoutOverlay(cutoutFrame: proxy[tagInfo.anchor], screenSize: proxy.size)
                 .onTapGesture {
                     guide.advance()
                 }
 
-            touchModeView(for: proxy[details.anchor], mode: details.touchMode)
+            touchModeView(for: proxy[tagInfo.anchor], mode: tagInfo.touchMode)
 
-            details.callout.createView(onTap: guide.advance)
+            tagInfo.callout.createView(onTap: guide.advance)
                 .offset(
-                    x: offsetX(cutout: proxy[details.anchor]),
-                    y: offsetY(cutout: proxy[details.anchor])
+                    x: offsetX(cutout: proxy[tagInfo.anchor]),
+                    y: offsetY(cutout: proxy[tagInfo.anchor])
                 )
         }.edgesIgnoringSafeArea(.all)
     }
@@ -178,14 +178,14 @@ struct OverlayFrame: Identifiable {
     }
 }
 
-struct SherpaDetails {
+struct DuxTagInfo {
     let anchor: Anchor<CGRect>
     let callout: Callout
     let touchMode: CutoutTouchMode
 }
 
-struct SherpaPreferenceKey: PreferenceKey {
-    typealias Value = [String: SherpaDetails]
+struct DuxTagPreferenceKey: PreferenceKey {
+    typealias Value = [String: DuxTagInfo]
     
     static var defaultValue: Value = [:]
     
